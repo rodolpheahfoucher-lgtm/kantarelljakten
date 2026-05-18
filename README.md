@@ -1,0 +1,1 @@
+Kantarellkartan takes the guesswork out of the hunt. Using real-time rainfall data and regional weather conditions, the app calculates where chanterelles are most likely to be thriving right now — so you spend less time searching and more time picking.
