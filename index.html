@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2d4a1e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Kantarellkartan</title>
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="/manifest.json">
+
+<!-- iOS PWA support -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kantarell">
+<link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png">
+<link rel="apple-touch-startup-image" href="/icons/icon-512x512.png">
+
+<!-- Android / general -->
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root {
+    --forest: #2d4a1e;
+    --forest-mid: #3d6128;
+    --forest-light: #5a8a3a;
+    --gold: #c8901a;
+    --gold-light: #e8b84b;
+    --gold-pale: #f5e4b0;
+    --cream: #f7f2e8;
+    --bark: #6b4c2a;
+    --mist: #e8ede0;
+    --text: #1a2410;
+    --text-muted: #5a6b4a;
+    --wet: #2a6fa8;
+    --damp: #4a9e6b;
+    --dry: #c4923a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--forest);
+    color: var(--gold-pale);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    font-size: 28px;
+    line-height: 1;
+  }
+  .logo-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gold-light);
+    letter-spacing: 0.02em;
+  }
+  .logo-text p {
+    font-size: 11px;
+    color: rgba(245,228,176,0.6);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .lang-toggle {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(200,144,26,0.4);
+    border-radius: 20px;
+    padding: 4px 6px;
+    display: flex;
+    gap: 2px;
+  }
+  .lang-btn {
+    background: none;
+    border: none;
+    color: rgba(245,228,176,0.6);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .lang-btn.active {
+    background: var(--gold);
+    color: var(--forest);
+  }
+  .subscribe-btn {
+    background: var(--gold);
+    color: var(--forest);
+    border: none;
+    border-radius: 20px;
+    padding: 7px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .subscribe-btn:hover { background: var(--gold-light); }
+
+  /* PREMIUM BANNER */
+  .premium-banner {
+    background: linear-gradient(135deg, var(--forest-mid), var(--forest));
+    color: var(--gold-pale);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(200,144,26,0.3);
+  }
+  .premium-badge {
+    background: var(--gold);
+    color: var(--forest);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-right: 10px;
+  }
+  .premium-text { font-size: 13px; }
+  .premium-cta {
+    font-size: 12px;
+    color: var(--gold-light);
+    text-decoration: underline;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* MAIN LAYOUT */
+  .app-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    height: calc(100vh - 100px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: white;
+    border-right: 1px solid rgba(90,107,74,0.15);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .location-search {
+    padding: 16px;
+    border-bottom: 1px solid var(--mist);
+  }
+  .search-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .search-row {
+    display: flex;
+    gap: 8px;
+  }
+  .search-input {
+    flex: 1;
+    padding: 9px 12px;
+    border: 1.5px solid var(--mist);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--cream);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--forest-light); }
+  .locate-btn {
+    background: var(--forest);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 12px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+  }
+  .locate-btn:hover { background: var(--forest-mid); }
+
+  /* QUICK REGION BUTTONS */
+  .quick-regions {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--mist);
+  }
+  .region-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .chip {
+    background: var(--mist);
+    border: 1px solid transparent;
+    border-radius: 16px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .chip:hover, .chip.active {
+    background: var(--forest);
+    color: var(--gold-pale);
+    border-color: var(--forest);
+  }
+
+  /* SCORE CARD */
+  .score-section {
+    padding: 16px;
+    border-bottom: 1px solid var(--mist);
+  }
+  .score-card {
+    background: var(--forest);
+    border-radius: 12px;
+    padding: 16px;
+    color: var(--gold-pale);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .score-card::before {
+    content: '🍄';
+    position: absolute;
+    font-size: 80px;
+    right: -10px;
+    top: -10px;
+    opacity: 0.15;
+  }
+  .score-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(245,228,176,0.6);
+    margin-bottom: 4px;
+  }
+  .score-location {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-bottom: 12px;
+  }
+  .score-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 56px;
+    font-weight: 700;
+    color: var(--gold-light);
+    line-height: 1;
+  }
+  .score-unit { font-size: 18px; color: rgba(245,228,176,0.6); }
+  .score-verdict {
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 20px;
+    display: inline-block;
+  }
+  .verdict-excellent { background: rgba(200,144,26,0.3); color: var(--gold-light); }
+  .verdict-good { background: rgba(90,138,58,0.3); color: #9ed66a; }
+  .verdict-fair { background: rgba(200,100,50,0.2); color: #f0a070; }
+  .verdict-poor { background: rgba(180,80,80,0.2); color: #f08080; }
+
+  /* RAIN METRICS */
+  .metrics-section {
+    padding: 16px;
+    border-bottom: 1px solid var(--mist);
+  }
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .metric-box {
+    background: var(--cream);
+    border: 1px solid var(--mist);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .metric-name {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+  .metric-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--forest);
+  }
+  .metric-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* RAIN BARS */
+  .rain-chart {
+    padding: 16px;
+    border-bottom: 1px solid var(--mist);
+  }
+  .section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  .day-bars {
+    display: flex;
+    gap: 6px;
+    align-items: flex-end;
+    height: 80px;
+  }
+  .day-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar-wrap { flex: 1; display: flex; align-items: flex-end; width: 100%; }
+  .bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    transition: height 0.6s ease;
+    min-height: 3px;
+  }
+  .bar-rain { background: var(--wet); }
+  .bar-day { font-size: 10px; color: var(--text-muted); font-weight: 500; }
+  .bar-mm { font-size: 10px; color: var(--text-muted); }
+
+  /* CONDITIONS */
+  .conditions-section {
+    padding: 16px;
+  }
+  .condition-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(90,107,74,0.1);
+  }
+  .condition-row:last-child { border-bottom: none; }
+  .cond-label { font-size: 13px; color: var(--text-muted); }
+  .cond-pill {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 12px;
+  }
+  .pill-green { background: #dff0d0; color: #2a6020; }
+  .pill-yellow { background: #fef3cd; color: #7a5c10; }
+  .pill-red { background: #fde8e8; color: #8a2020; }
+
+  /* MAP */
+  #map {
+    flex: 1;
+    height: 100%;
+    z-index: 1;
+  }
+  .map-container { flex: 1; position: relative; }
+  .map-legend {
+    position: absolute;
+    bottom: 20px;
+    right: 10px;
+    background: white;
+    border-radius: 10px;
+    padding: 12px 14px;
+    z-index: 500;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    font-size: 12px;
+    min-width: 140px;
+  }
+  .legend-title {
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 8px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .legend-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; color: var(--text-muted); }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+  /* MODAL */
+  .modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 16px;
+    max-width: 420px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .modal-header {
+    background: var(--forest);
+    padding: 28px 28px 20px;
+    text-align: center;
+  }
+  .modal-mushroom { font-size: 40px; margin-bottom: 8px; }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--gold-light);
+    margin-bottom: 4px;
+  }
+  .modal-sub { font-size: 13px; color: rgba(245,228,176,0.7); }
+  .modal-body { padding: 24px 28px; }
+  .plan-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .plan-card {
+    border: 1.5px solid var(--mist);
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .plan-card.featured {
+    border-color: var(--gold);
+    background: rgba(200,144,26,0.04);
+  }
+  .plan-name { font-weight: 500; font-size: 14px; color: var(--text); }
+  .plan-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: var(--forest);
+    margin: 4px 0;
+  }
+  .plan-period { font-size: 11px; color: var(--text-muted); }
+  .plan-features { margin-top: 8px; }
+  .plan-feat { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin: 3px 0; }
+  .feat-check { color: var(--forest-light); }
+  .best-badge {
+    background: var(--gold);
+    color: var(--forest);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    float: right;
+  }
+  .modal-cta {
+    width: 100%;
+    background: var(--forest);
+    color: var(--gold-pale);
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 10px;
+  }
+  .modal-cta:hover { background: var(--forest-mid); }
+  .modal-fine { font-size: 11px; color: var(--text-muted); text-align: center; }
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  .modal-header { position: relative; }
+
+  /* LOADING */
+  .loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(247,242,232,0.85);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--mist);
+    border-top-color: var(--forest);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 13px; color: var(--text-muted); }
+
+  /* MOBILE */
+  @media (max-width: 700px) {
+    .app-layout {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+      height: auto;
+    }
+    .sidebar { max-height: 55vh; }
+    .map-container { height: 50vh; }
+    .premium-banner { flex-wrap: wrap; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🍄</div>
+      <div class="logo-text">
+        <h1 id="app-title">Kantarellkartan</h1>
+        <p id="app-sub">Hitta din guldskatt i skogen</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLang('sv')">SV</button>
+        <button class="lang-btn" onclick="setLang('en')">EN</button>
+      </div>
+      <button class="subscribe-btn" onclick="openModal()" id="sub-btn">✦ Premium</button>
+    </div>
+  </div>
+</header>
+
+<div class="premium-banner">
+  <div style="display:flex;align-items:center;">
+    <span class="premium-badge">Free</span>
+    <span class="premium-text" id="banner-text">Du ser 3 regioner gratis. Lås upp hela Sverige.</span>
+  </div>
+  <span class="premium-cta" onclick="openModal()" id="banner-cta">Uppgradera →</span>
+</div>
+
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="location-search">
+      <div class="search-label" id="lbl-search">Sök plats</div>
+      <div class="search-row">
+        <input class="search-input" id="search-input" placeholder="t.ex. Dalarna, Värmland..." />
+        <button class="locate-btn" onclick="locateMe()" title="GPS">📍</button>
+      </div>
+    </div>
+
+    <div class="quick-regions">
+      <div class="search-label" id="lbl-regions">Snabbval</div>
+      <div class="region-chips" id="region-chips"></div>
+    </div>
+
+    <div class="score-section">
+      <div class="score-card">
+        <div class="score-label" id="lbl-likelihood">Kantarellsannolikhet</div>
+        <div class="score-location" id="score-location">Dalarna</div>
+        <div>
+          <span class="score-number" id="score-number">78</span>
+          <span class="score-unit">%</span>
+        </div>
+        <div class="score-verdict verdict-good" id="score-verdict">Bra förhållanden</div>
+      </div>
+    </div>
+
+    <div class="metrics-section">
+      <div class="section-title" id="lbl-conditions">Väderförhållanden</div>
+      <div class="metrics-grid">
+        <div class="metric-box">
+          <div class="metric-name" id="lbl-7day">7 dagars regn</div>
+          <div class="metric-val" id="met-7day">—</div>
+          <div class="metric-sub">mm</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-name" id="lbl-temp">Temperatur</div>
+          <div class="metric-val" id="met-temp">—</div>
+          <div class="metric-sub">°C</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-name" id="lbl-humid">Luftfuktighet</div>
+          <div class="metric-val" id="met-humid">—</div>
+          <div class="metric-sub">%</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-name" id="lbl-today">Idag</div>
+          <div class="metric-val" id="met-today">—</div>
+          <div class="metric-sub">mm regn</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rain-chart">
+      <div class="section-title" id="lbl-7chart">7-dagars regnhistorik</div>
+      <div class="day-bars" id="day-bars"></div>
+    </div>
+
+    <div class="conditions-section">
+      <div class="section-title" id="lbl-analysis">Svampanalys</div>
+      <div class="condition-row">
+        <span class="cond-label" id="cond-moisture-lbl">Markfukt</span>
+        <span class="cond-pill" id="cond-moisture">—</span>
+      </div>
+      <div class="condition-row">
+        <span class="cond-label" id="cond-temp-lbl">Temperatur</span>
+        <span class="cond-pill" id="cond-temp">—</span>
+      </div>
+      <div class="condition-row">
+        <span class="cond-label" id="cond-season-lbl">Säsong</span>
+        <span class="cond-pill" id="cond-season">—</span>
+      </div>
+      <div class="condition-row">
+        <span class="cond-label" id="cond-trend-lbl">Regntrend</span>
+        <span class="cond-pill" id="cond-trend">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div class="map-container" style="position:relative;">
+    <div class="loading-overlay" id="loading">
+      <div class="spinner"></div>
+      <div class="loading-text" id="loading-text">Hämtar väderdata...</div>
+    </div>
+    <div id="map"></div>
+    <div class="map-legend">
+      <div class="legend-title" id="lbl-legend">Sannolikhet</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#2a7a3a;"></div><span id="leg-exc">Utmärkt (80%+)</span></div>
+      <div class="legend-row"><div class="legend-dot" style="background:#5aaa4a;"></div><span id="leg-good">Bra (60–79%)</span></div>
+      <div class="legend-row"><div class="legend-dot" style="background:#e8a020;"></div><span id="leg-fair">Okej (40–59%)</span></div>
+      <div class="legend-row"><div class="legend-dot" style="background:#c04040;"></div><span id="leg-poor">Låg (&lt;40%)</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SUBSCRIBE MODAL -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-mushroom">🍄</div>
+      <div class="modal-title" id="modal-title">Lås upp hela Sverige</div>
+      <div class="modal-sub" id="modal-sub">Hitta kantareller var som helst i landet</div>
+    </div>
+    <div class="modal-body">
+      <div class="plan-cards">
+        <div class="plan-card">
+          <div class="plan-name" id="plan-month-name">Månad</div>
+          <div class="plan-price">49 kr</div>
+          <div class="plan-period" id="plan-month-period">per månad</div>
+          <div class="plan-features">
+            <div class="plan-feat"><span class="feat-check">✓</span><span id="feat1">Alla regioner</span></div>
+            <div class="plan-feat"><span class="feat-check">✓</span><span id="feat2">Dagliga uppdateringar</span></div>
+            <div class="plan-feat"><span class="feat-check">✓</span><span id="feat3">7-dagars historik</span></div>
+          </div>
+        </div>
+        <div class="plan-card featured">
+          <div class="plan-name" id="plan-year-name">Säsong <span class="best-badge" id="best-badge">Bäst</span></div>
+          <div class="plan-price">249 kr</div>
+          <div class="plan-period" id="plan-year-period">per år · spara 42%</div>
+          <div class="plan-features">
+            <div class="plan-feat"><span class="feat-check">✓</span><span id="feat4">Allt i Månad</span></div>
+            <div class="plan-feat"><span class="feat-check">✓</span><span id="feat5">Push-notiser</span></div>
+            <div class="plan-feat"><span class="feat-check">✓</span><span id="feat6">Tidig åtkomst</span></div>
+          </div>
+        </div>
+      </div>
+      <button class="modal-cta" id="modal-cta">Starta med Säsong – 249 kr/år</button>
+      <div class="modal-fine" id="modal-fine">Avbryt när som helst · Säker betalning via Stripe</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── TRANSLATIONS ────────────────────────────────────────────────
+const T = {
+  sv: {
+    appTitle: 'Kantarellkartan',
+    appSub: 'Hitta din guldskatt i skogen',
+    subBtn: '✦ Premium',
+    bannerText: 'Du ser 3 regioner gratis. Lås upp hela Sverige.',
+    bannerCta: 'Uppgradera →',
+    lblSearch: 'Sök plats',
+    searchPlaceholder: 't.ex. Dalarna, Värmland...',
+    lblRegions: 'Snabbval',
+    lblLikelihood: 'Kantarellsannolikhet',
+    lblConditions: 'Väderförhållanden',
+    lbl7day: '7 dagars regn',
+    lblTemp: 'Temperatur',
+    lblHumid: 'Luftfuktighet',
+    lblToday: 'Idag',
+    lbl7chart: '7-dagars regnhistorik',
+    lblAnalysis: 'Svampanalys',
+    condMoisture: 'Markfukt',
+    condTemp: 'Temperatur',
+    condSeason: 'Säsong',
+    condTrend: 'Regntrend',
+    legendTitle: 'Sannolikhet',
+    legExc: 'Utmärkt (80%+)',
+    legGood: 'Bra (60–79%)',
+    legFair: 'Okej (40–59%)',
+    legPoor: 'Låg (<40%)',
+    loading: 'Hämtar väderdata...',
+    verdictExcellent: '🌟 Utmärkta förhållanden!',
+    verdictGood: 'Bra förhållanden',
+    verdictFair: 'Okej förhållanden',
+    verdictPoor: 'Dåliga förhållanden',
+    pillOptimal: 'Optimal',
+    pillGood: 'Bra',
+    pillPoor: 'Dålig',
+    pillPeak: 'Högsäsong',
+    pillSeason: 'I säsong',
+    pillOffSeason: 'Utanför säsong',
+    pillRising: 'Stigande ☔',
+    pillStable: 'Stabilt',
+    pillDry: 'Sjunkande',
+    modalTitle: 'Lås upp hela Sverige',
+    modalSub: 'Hitta kantareller var som helst i landet',
+    planMonthName: 'Månad',
+    planMonthPeriod: 'per månad',
+    planYearName: 'Säsong',
+    bestBadge: 'Bäst',
+    planYearPeriod: 'per år · spara 42%',
+    feat1: 'Alla regioner',
+    feat2: 'Dagliga uppdateringar',
+    feat3: '7-dagars historik',
+    feat4: 'Allt i Månad',
+    feat5: 'Push-notiser',
+    feat6: 'Tidig åtkomst',
+    modalCta: 'Starta med Säsong – 249 kr/år',
+    modalFine: 'Avbryt när som helst · Säker betalning via Stripe',
+    regions: ['Dalarna','Värmland','Norrland','Småland','Skåne','Gotland','Jämtland','Uppland'],
+  },
+  en: {
+    appTitle: 'ChanterelleMap',
+    appSub: 'Find your golden treasure in the forest',
+    subBtn: '✦ Premium',
+    bannerText: 'You see 3 regions for free. Unlock all of Sweden.',
+    bannerCta: 'Upgrade →',
+    lblSearch: 'Search location',
+    searchPlaceholder: 'e.g. Dalarna, Värmland...',
+    lblRegions: 'Quick select',
+    lblLikelihood: 'Chanterelle likelihood',
+    lblConditions: 'Weather conditions',
+    lbl7day: '7-day rainfall',
+    lblTemp: 'Temperature',
+    lblHumid: 'Humidity',
+    lblToday: 'Today',
+    lbl7chart: '7-day rain history',
+    lblAnalysis: 'Mushroom analysis',
+    condMoisture: 'Soil moisture',
+    condTemp: 'Temperature',
+    condSeason: 'Season',
+    condTrend: 'Rain trend',
+    legendTitle: 'Likelihood',
+    legExc: 'Excellent (80%+)',
+    legGood: 'Good (60–79%)',
+    legFair: 'Fair (40–59%)',
+    legPoor: 'Low (<40%)',
+    loading: 'Fetching weather data...',
+    verdictExcellent: '🌟 Excellent conditions!',
+    verdictGood: 'Good conditions',
+    verdictFair: 'Fair conditions',
+    verdictPoor: 'Poor conditions',
+    pillOptimal: 'Optimal',
+    pillGood: 'Good',
+    pillPoor: 'Poor',
+    pillPeak: 'Peak season',
+    pillSeason: 'In season',
+    pillOffSeason: 'Off season',
+    pillRising: 'Rising ☔',
+    pillStable: 'Stable',
+    pillDry: 'Declining',
+    modalTitle: 'Unlock all of Sweden',
+    modalSub: 'Find chanterelles anywhere in the country',
+    planMonthName: 'Monthly',
+    planMonthPeriod: 'per month',
+    planYearName: 'Season',
+    bestBadge: 'Best',
+    planYearPeriod: 'per year · save 42%',
+    feat1: 'All regions',
+    feat2: 'Daily updates',
+    feat3: '7-day history',
+    feat4: 'Everything in Monthly',
+    feat5: 'Push notifications',
+    feat6: 'Early access',
+    modalCta: 'Start Season plan – 249 kr/yr',
+    modalFine: 'Cancel anytime · Secure payment via Stripe',
+    regions: ['Dalarna','Värmland','Norrland','Småland','Skåne','Gotland','Jämtland','Uppland'],
+  }
+};
+
+let lang = 'sv';
+let map, selectedRegion = 'Dalarna';
+let markers = [];
+
+// REGION DATA: lat/lng and premium flag
+const REGIONS = {
+  Dalarna:  { lat: 61.0, lng: 14.5, premium: false },
+  Värmland: { lat: 59.7, lng: 13.2, premium: false },
+  Norrland: { lat: 64.5, lng: 18.0, premium: false },
+  Småland:  { lat: 57.0, lng: 14.8, premium: true },
+  Skåne:    { lat: 55.9, lng: 13.5, premium: true },
+  Gotland:  { lat: 57.5, lng: 18.5, premium: true },
+  Jämtland: { lat: 63.2, lng: 14.6, premium: true },
+  Uppland:  { lat: 59.9, lng: 17.8, premium: true },
+};
+
+// ── LANG ───────────────────────────────────────────────────────
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent === l.toUpperCase()));
+  applyTranslations();
+  renderChips();
+  if (selectedRegion) loadRegion(selectedRegion);
+}
+
+function applyTranslations() {
+  const t = T[lang];
+  document.getElementById('app-title').textContent = t.appTitle;
+  document.getElementById('app-sub').textContent = t.appSub;
+  document.getElementById('sub-btn').textContent = t.subBtn;
+  document.getElementById('banner-text').textContent = t.bannerText;
+  document.getElementById('banner-cta').textContent = t.bannerCta;
+  document.getElementById('lbl-search').textContent = t.lblSearch;
+  document.getElementById('search-input').placeholder = t.searchPlaceholder;
+  document.getElementById('lbl-regions').textContent = t.lblRegions;
+  document.getElementById('lbl-likelihood').textContent = t.lblLikelihood;
+  document.getElementById('lbl-conditions').textContent = t.lblConditions;
+  document.getElementById('lbl-7day').textContent = t.lbl7day;
+  document.getElementById('lbl-temp').textContent = t.lblTemp;
+  document.getElementById('lbl-humid').textContent = t.lblHumid;
+  document.getElementById('lbl-today').textContent = t.lblToday;
+  document.getElementById('lbl-7chart').textContent = t.lbl7chart;
+  document.getElementById('lbl-analysis').textContent = t.lblAnalysis;
+  document.getElementById('cond-moisture-lbl').textContent = t.condMoisture;
+  document.getElementById('cond-temp-lbl').textContent = t.condTemp;
+  document.getElementById('cond-season-lbl').textContent = t.condSeason;
+  document.getElementById('cond-trend-lbl').textContent = t.condTrend;
+  document.getElementById('lbl-legend').textContent = t.legendTitle;
+  document.getElementById('leg-exc').textContent = t.legExc;
+  document.getElementById('leg-good').textContent = t.legGood;
+  document.getElementById('leg-fair').textContent = t.legFair;
+  document.getElementById('leg-poor').textContent = t.legPoor;
+  document.getElementById('loading-text').textContent = t.loading;
+  document.getElementById('modal-title').textContent = t.modalTitle;
+  document.getElementById('modal-sub').textContent = t.modalSub;
+  document.getElementById('plan-month-name').textContent = t.planMonthName;
+  document.getElementById('plan-month-period').textContent = t.planMonthPeriod;
+  document.getElementById('plan-year-name').innerHTML = t.planYearName + ' <span class="best-badge">' + t.bestBadge + '</span>';
+  document.getElementById('plan-year-period').textContent = t.planYearPeriod;
+  document.getElementById('feat1').textContent = t.feat1;
+  document.getElementById('feat2').textContent = t.feat2;
+  document.getElementById('feat3').textContent = t.feat3;
+  document.getElementById('feat4').textContent = t.feat4;
+  document.getElementById('feat5').textContent = t.feat5;
+  document.getElementById('feat6').textContent = t.feat6;
+  document.getElementById('modal-cta').textContent = t.modalCta;
+  document.getElementById('modal-fine').textContent = t.modalFine;
+}
+
+// ── CHIPS ──────────────────────────────────────────────────────
+function renderChips() {
+  const container = document.getElementById('region-chips');
+  container.innerHTML = '';
+  T[lang].regions.forEach(r => {
+    const locked = REGIONS[r]?.premium;
+    const btn = document.createElement('button');
+    btn.className = 'chip' + (r === selectedRegion ? ' active' : '');
+    btn.textContent = (locked ? '🔒 ' : '') + r;
+    btn.onclick = () => {
+      if (locked) { openModal(); return; }
+      selectedRegion = r;
+      renderChips();
+      loadRegion(r);
+    };
+    container.appendChild(btn);
+  });
+}
+
+// ── MAP ────────────────────────────────────────────────────────
+function initMap() {
+  map = L.map('map', { center: [62, 15], zoom: 5, zoomControl: true });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    maxZoom: 18
+  }).addTo(map);
+}
+
+function scoreColor(s) {
+  if (s >= 80) return '#2a7a3a';
+  if (s >= 60) return '#5aaa4a';
+  if (s >= 40) return '#e8a020';
+  return '#c04040';
+}
+
+function addMapMarkers(scores) {
+  markers.forEach(m => m.remove());
+  markers = [];
+  Object.entries(scores).forEach(([region, score]) => {
+    const reg = REGIONS[region];
+    if (!reg) return;
+    const color = scoreColor(score);
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="background:${color};color:white;border-radius:50%;width:46px;height:46px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);cursor:pointer;">${score}%</div>`,
+      iconSize: [46, 46],
+      iconAnchor: [23, 23],
+    });
+    const marker = L.marker([reg.lat, reg.lng], { icon }).addTo(map);
+    marker.bindPopup(`<b>${region}</b><br>🍄 ${score}% likelihood`);
+    marker.on('click', () => {
+      if (reg.premium) { openModal(); return; }
+      selectedRegion = region;
+      renderChips();
+      loadRegion(region);
+    });
+    markers.push(marker);
+  });
+}
+
+// ── WEATHER API ────────────────────────────────────────────────
+async function fetchWeather(lat, lng) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=precipitation_sum,temperature_2m_max,temperature_2m_min&hourly=relative_humidity_2m&current=temperature_2m,relative_humidity_2m,precipitation&timezone=Europe%2FStockholm&past_days=7&forecast_days=1`;
+  const res = await fetch(url);
+  return res.json();
+}
+
+function calcScore(data) {
+  const daily = data.daily;
+  const past7 = daily.precipitation_sum.slice(0, 7);
+  const total7 = past7.reduce((a,b) => a+(b||0), 0);
+  const avgTemp = (daily.temperature_2m_max.slice(0,7).reduce((a,b)=>a+(b||0),0) / 7);
+  const humidity = data.current.relative_humidity_2m || 70;
+  const month = new Date().getMonth() + 1;
+  const inSeason = month >= 6 && month <= 10;
+
+  let score = 0;
+  // Rainfall score (ideal: 20-60mm over 7 days)
+  if (total7 >= 20 && total7 <= 60) score += 40;
+  else if (total7 >= 10 && total7 < 20) score += 25;
+  else if (total7 > 60 && total7 <= 90) score += 30;
+  else if (total7 > 90) score += 15;
+  else score += 5;
+
+  // Temperature score (ideal: 15-22°C)
+  if (avgTemp >= 15 && avgTemp <= 22) score += 30;
+  else if (avgTemp >= 10 && avgTemp < 15) score += 20;
+  else if (avgTemp > 22 && avgTemp <= 26) score += 15;
+  else score += 5;
+
+  // Humidity
+  if (humidity >= 70) score += 20;
+  else if (humidity >= 55) score += 12;
+  else score += 4;
+
+  // Season bonus
+  if (inSeason) score += 10;
+
+  return { score: Math.min(98, Math.max(5, score)), total7, avgTemp, humidity, past7, inSeason };
+}
+
+// ── LOAD REGION ─────────────────────────────────────────────────
+async function loadRegion(name) {
+  const reg = REGIONS[name];
+  if (!reg) return;
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('score-location').textContent = name;
+
+  try {
+    const data = await fetchWeather(reg.lat, reg.lng);
+    const { score, total7, avgTemp, humidity, past7, inSeason } = calcScore(data);
+    const t = T[lang];
+
+    // Score display
+    document.getElementById('score-number').textContent = score;
+    const verdict = document.getElementById('score-verdict');
+    if (score >= 80) { verdict.textContent = t.verdictExcellent; verdict.className = 'score-verdict verdict-excellent'; }
+    else if (score >= 60) { verdict.textContent = t.verdictGood; verdict.className = 'score-verdict verdict-good'; }
+    else if (score >= 40) { verdict.textContent = t.verdictFair; verdict.className = 'score-verdict verdict-fair'; }
+    else { verdict.textContent = t.verdictPoor; verdict.className = 'score-verdict verdict-poor'; }
+
+    // Metrics
+    document.getElementById('met-7day').textContent = total7.toFixed(1);
+    document.getElementById('met-temp').textContent = avgTemp.toFixed(1);
+    document.getElementById('met-humid').textContent = humidity;
+    document.getElementById('met-today').textContent = (data.current.precipitation || 0).toFixed(1);
+
+    // Rain bars
+    const days = ['Mån','Tis','Ons','Tor','Fre','Lör','Sön'];
+    const daysEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const today = new Date().getDay();
+    const maxRain = Math.max(...past7, 1);
+    const bars = document.getElementById('day-bars');
+    bars.innerHTML = '';
+    past7.slice(-7).forEach((mm, i) => {
+      const h = Math.max(4, Math.round((mm / maxRain) * 70));
+      const dayIdx = (today - 6 + i + 7) % 7;
+      const label = lang === 'sv' ? days[dayIdx] : daysEn[dayIdx];
+      bars.innerHTML += `<div class="day-col">
+        <div class="bar-mm">${mm ? mm.toFixed(0) : '0'}</div>
+        <div class="bar-wrap"><div class="bar bar-rain" style="height:${h}px"></div></div>
+        <div class="bar-day">${label}</div>
+      </div>`;
+    });
+
+    // Conditions
+    const moisture = total7 >= 20 && total7 <= 70 ? ['pill-green', t.pillOptimal] : total7 >= 10 ? ['pill-yellow', t.pillGood] : ['pill-red', t.pillPoor];
+    const tempCond = avgTemp >= 14 && avgTemp <= 22 ? ['pill-green', t.pillOptimal] : avgTemp >= 8 ? ['pill-yellow', t.pillGood] : ['pill-red', t.pillPoor];
+    const seasonCond = month => {
+      const m = new Date().getMonth() + 1;
+      if (m >= 7 && m <= 9) return ['pill-green', t.pillPeak];
+      if (m >= 6 && m <= 10) return ['pill-yellow', t.pillSeason];
+      return ['pill-red', t.pillOffSeason];
+    };
+    const last3 = past7.slice(-3).reduce((a,b)=>a+(b||0),0);
+    const first3 = past7.slice(0,3).reduce((a,b)=>a+(b||0),0);
+    const trend = last3 > first3 + 5 ? ['pill-green', t.pillRising] : last3 > first3 - 5 ? ['pill-yellow', t.pillStable] : ['pill-red', t.pillDry];
+
+    setCondition('cond-moisture', moisture);
+    setCondition('cond-temp', tempCond);
+    setCondition('cond-season', seasonCond());
+    setCondition('cond-trend', trend);
+
+    // Map markers — fetch scores for all free regions
+    const scores = {};
+    for (const [rname, rdata] of Object.entries(REGIONS)) {
+      if (!rdata.premium) {
+        if (rname === name) { scores[rname] = score; continue; }
+        try {
+          const d2 = await fetchWeather(rdata.lat, rdata.lng);
+          scores[rname] = calcScore(d2).score;
+        } catch { scores[rname] = 50; }
+      } else {
+        scores[rname] = Math.floor(Math.random() * 40) + 40;
+      }
+    }
+    addMapMarkers(scores);
+    map.setView([reg.lat, reg.lng], 7, { animate: true });
+
+  } catch (e) {
+    console.error(e);
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+  }
+}
+
+function setCondition(id, [cls, label]) {
+  const el = document.getElementById(id);
+  el.className = 'cond-pill ' + cls;
+  el.textContent = label;
+}
+
+// ── LOCATE ─────────────────────────────────────────────────────
+function locateMe() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos => {
+    const { latitude: lat, longitude: lng } = pos.coords;
+    map.setView([lat, lng], 9);
+    // Find nearest region
+    let nearest = 'Dalarna', minDist = Infinity;
+    Object.entries(REGIONS).forEach(([name, r]) => {
+      const d = Math.hypot(r.lat - lat, r.lng - lng);
+      if (d < minDist) { minDist = d; nearest = name; }
+    });
+    if (!REGIONS[nearest].premium) {
+      selectedRegion = nearest;
+      renderChips();
+      loadRegion(nearest);
+    }
+  });
+}
+
+// ── SEARCH ─────────────────────────────────────────────────────
+document.getElementById('search-input').addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const val = e.target.value.trim();
+  const match = Object.keys(REGIONS).find(r => r.toLowerCase().includes(val.toLowerCase()));
+  if (match) {
+    if (REGIONS[match].premium) { openModal(); return; }
+    selectedRegion = match;
+    renderChips();
+    loadRegion(match);
+  }
+});
+
+// ── MODAL ──────────────────────────────────────────────────────
+function openModal() { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
+
+// ── INIT ───────────────────────────────────────────────────────
+initMap();
+applyTranslations();
+renderChips();
+loadRegion('Dalarna');
+
+// ── SERVICE WORKER ──────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW error:', err));
+  });
+}
+
+// ── INSTALL PROMPT (Android) ────────────────────────────────────
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(() => {
+    if (!deferredPrompt) return;
+    const banner = document.createElement('div');
+    banner.id = 'install-banner';
+    banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2d4a1e;color:#f5e4b0;padding:12px 20px;border-radius:24px;font-family:DM Sans,sans-serif;font-size:14px;display:flex;align-items:center;gap:12px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);white-space:nowrap;';
+    banner.innerHTML = '<span>🍄</span><span id="install-txt">' + (lang==='sv'?'Installera appen':'Install the app') + '</span><button onclick="installApp()" style="background:#c8901a;color:#2d4a1e;border:none;border-radius:14px;padding:5px 14px;font-weight:500;font-size:13px;cursor:pointer;">' + (lang==='sv'?'Installera':'Install') + '</button><button onclick="document.getElementById(\'install-banner\').remove()" style="background:none;border:none;color:rgba(245,228,176,0.6);font-size:18px;cursor:pointer;padding:0 4px;">✕</button>';
+    document.body.appendChild(banner);
+  }, 10000);
+});
+
+function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => {
+    deferredPrompt = null;
+    const b = document.getElementById('install-banner');
+    if (b) b.remove();
+  });
+}
+</script>
+</body>
+</html>
