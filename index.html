@@ -966,7 +966,7 @@ const T = {
     feat6: 'Tidig åtkomst',
     modalCta: 'Starta med Säsong – 249 kr/år',
     modalFine: 'Avbryt när som helst · Säker betalning via Stripe',
-    regions: ['Dalarna','Värmland','Norrland','Småland','Skåne','Gotland','Jämtland','Uppland'],
+    regions: ['Dalarna','Värmland','Norrland','Södermanland','Småland','Skåne','Gotland','Jämtland','Uppland'],
   },
   en: {
     appTitle: 'ChanterelleHunt',
@@ -1023,7 +1023,7 @@ const T = {
     feat6: 'Early access',
     modalCta: 'Start Season plan – 249 kr/yr',
     modalFine: 'Cancel anytime · Secure payment via Stripe',
-    regions: ['Dalarna','Värmland','Norrland','Småland','Skåne','Gotland','Jämtland','Uppland'],
+    regions: ['Dalarna','Värmland','Norrland','Södermanland','Småland','Skåne','Gotland','Jämtland','Uppland'],
   }
 };
 
@@ -1033,14 +1033,15 @@ let markers = [];
 
 // REGION DATA: lat/lng and premium flag
 const REGIONS = {
-  Dalarna:  { lat: 61.0, lng: 14.5, premium: false },
-  Värmland: { lat: 59.7, lng: 13.2, premium: false },
-  Norrland: { lat: 64.5, lng: 18.0, premium: false },
-  Småland:  { lat: 57.0, lng: 14.8, premium: true },
-  Skåne:    { lat: 55.9, lng: 13.5, premium: true },
-  Gotland:  { lat: 57.5, lng: 18.5, premium: true },
-  Jämtland: { lat: 63.2, lng: 14.6, premium: true },
-  Uppland:  { lat: 59.9, lng: 17.8, premium: true },
+  Dalarna:      { lat: 61.0, lng: 14.5, premium: false },
+  Värmland:     { lat: 59.7, lng: 13.2, premium: false },
+  Norrland:     { lat: 64.5, lng: 18.0, premium: false },
+  Södermanland: { lat: 59.0, lng: 16.7, premium: false },
+  Småland:      { lat: 57.0, lng: 14.8, premium: true },
+  Skåne:        { lat: 55.9, lng: 13.5, premium: true },
+  Gotland:      { lat: 57.5, lng: 18.5, premium: true },
+  Jämtland:     { lat: 63.2, lng: 14.6, premium: true },
+  Uppland:      { lat: 59.9, lng: 17.8, premium: true },
 };
 
 // ── LANG ───────────────────────────────────────────────────────
