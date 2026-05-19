@@ -1,5 +1,5 @@
 {
-  "name": "Kantarellkartan",
+  "name": "Kantarelljakten",
   "short_name": "Kantarell",
   "description": "Hitta kantareller med regndata och platsinfo för hela Sverige",
   "start_url": "/",
@@ -25,7 +25,7 @@
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Kantarellkartan – Svampsäsongens bästa vän"
+      "label": "Kantarelljakten – Svampsäsongens bästa vän"
     }
   ]
 }

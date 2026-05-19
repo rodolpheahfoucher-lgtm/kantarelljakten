@@ -1,4 +1,4 @@
-const CACHE = 'kantarell-v1';
+const CACHE = 'kantarelljakten-v1';
 const OFFLINE_ASSETS = [
   '/',
   '/index.html',
