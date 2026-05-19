@@ -565,6 +565,144 @@
     .map-container { height: 50vh; }
     .premium-banner { flex-wrap: wrap; gap: 6px; }
   }
+
+  /* JOURNAL TAB */
+  .tab-bar {
+    display: flex;
+    background: var(--forest);
+    border-bottom: 1px solid rgba(200,144,26,0.2);
+  }
+  .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: rgba(245,228,176,0.5);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 8px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .tab-btn.active {
+    color: var(--gold-light);
+    border-bottom-color: var(--gold);
+  }
+
+  /* JOURNAL PANEL */
+  .journal-panel {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    background: white;
+  }
+  .journal-panel.visible { display: flex; }
+
+  .journal-add {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--mist);
+    background: var(--cream);
+  }
+  .journal-add-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .journal-field {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid var(--mist);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: white;
+    margin-bottom: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .journal-field:focus { border-color: var(--forest-light); }
+  .journal-row { display: flex; gap: 8px; }
+  .journal-add-btn {
+    width: 100%;
+    background: var(--forest);
+    color: var(--gold-pale);
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 2px;
+  }
+  .journal-add-btn:hover { background: var(--forest-mid); }
+
+  .journal-entries { padding: 12px 16px; flex: 1; }
+  .journal-empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 30px 0;
+  }
+  .journal-empty-icon { font-size: 32px; margin-bottom: 8px; }
+
+  .journal-entry {
+    background: var(--cream);
+    border: 1px solid var(--mist);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .entry-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .entry-location {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--forest);
+  }
+  .entry-date { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .entry-details { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+  .entry-tag {
+    background: var(--mist);
+    border-radius: 10px;
+    padding: 3px 9px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .entry-tag.gold { background: rgba(200,144,26,0.15); color: var(--bark); }
+  .entry-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; font-style: italic; }
+  .entry-delete {
+    background: none;
+    border: none;
+    color: rgba(180,80,80,0.4);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 4px;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .entry-delete:hover { color: #c04040; }
+  .journal-count {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 8px 0 4px;
+    border-top: 1px solid var(--mist);
+    margin-top: 4px;
+  }
 </style>
 </head>
 <body>
@@ -599,6 +737,14 @@
 <div class="app-layout">
   <!-- SIDEBAR -->
   <div class="sidebar">
+    <!-- TAB BAR -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('map')" id="tab-map">🗺 <span id="tab-map-lbl">Karta</span></button>
+      <button class="tab-btn" onclick="switchTab('journal')" id="tab-journal">📓 <span id="tab-journal-lbl">Min Journal</span></button>
+    </div>
+
+    <!-- MAP SIDEBAR CONTENT -->
+    <div id="map-panel">
     <div class="location-search">
       <div class="search-label" id="lbl-search">Sök plats</div>
       <div class="search-row">
@@ -674,6 +820,28 @@
         <span class="cond-pill" id="cond-trend">—</span>
       </div>
     </div>
+    </div> <!-- end map-panel -->
+
+    <!-- JOURNAL PANEL -->
+    <div class="journal-panel" id="journal-panel">
+      <div class="journal-add">
+        <div class="journal-add-title" id="lbl-journal-add">📍 Logga ett fynd</div>
+        <input class="journal-field" id="j-location" placeholder="Plats (t.ex. Dalaskogen)" />
+        <div class="journal-row">
+          <input class="journal-field" id="j-amount" placeholder="Antal (t.ex. 2 kg)" style="flex:1;margin-bottom:0;" />
+          <input class="journal-field" id="j-date" type="date" style="flex:1;margin-bottom:0;" />
+        </div>
+        <input class="journal-field" id="j-note" placeholder="Anteckning (valfritt)..." style="margin-top:8px;" />
+        <button class="journal-add-btn" onclick="addJournalEntry()" id="j-add-btn">＋ Spara fynd</button>
+      </div>
+      <div class="journal-entries" id="journal-entries">
+        <div class="journal-empty" id="journal-empty">
+          <div class="journal-empty-icon">🌲</div>
+          <div id="journal-empty-text">Inga fynd ännu.<br>Logga ditt första kantarellfynd!</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- MAP -->
@@ -1188,6 +1356,140 @@ function installApp() {
     if (b) b.remove();
   });
 }
+
+// ── JOURNAL ─────────────────────────────────────────────────────
+const JOURNAL_KEY = 'kantarell_journal_v1';
+
+function loadJournal() {
+  try { return JSON.parse(localStorage.getItem(JOURNAL_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function saveJournal(entries) {
+  localStorage.setItem(JOURNAL_KEY, JSON.stringify(entries));
+}
+
+function addJournalEntry() {
+  const location = document.getElementById('j-location').value.trim();
+  const amount   = document.getElementById('j-amount').value.trim();
+  const date     = document.getElementById('j-date').value;
+  const note     = document.getElementById('j-note').value.trim();
+
+  if (!location) {
+    document.getElementById('j-location').focus();
+    document.getElementById('j-location').style.borderColor = '#c04040';
+    setTimeout(() => document.getElementById('j-location').style.borderColor = '', 1500);
+    return;
+  }
+
+  const entry = {
+    id: Date.now(),
+    location,
+    amount: amount || null,
+    date: date || new Date().toISOString().slice(0,10),
+    note: note || null,
+  };
+
+  const entries = loadJournal();
+  entries.unshift(entry);
+  saveJournal(entries);
+
+  // Clear fields
+  ['j-location','j-amount','j-note'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('j-date').value = '';
+
+  renderJournal();
+}
+
+function deleteJournalEntry(id) {
+  const entries = loadJournal().filter(e => e.id !== id);
+  saveJournal(entries);
+  renderJournal();
+}
+
+function renderJournal() {
+  const entries = loadJournal();
+  const container = document.getElementById('journal-entries');
+  const empty = document.getElementById('journal-empty');
+  const t = T[lang];
+
+  if (entries.length === 0) {
+    empty.style.display = 'block';
+    // Clear any old entry cards
+    Array.from(container.children).forEach(c => { if (c !== empty) c.remove(); });
+    return;
+  }
+
+  empty.style.display = 'none';
+  // Remove old cards
+  Array.from(container.querySelectorAll('.journal-entry')).forEach(c => c.remove());
+
+  entries.forEach(e => {
+    const card = document.createElement('div');
+    card.className = 'journal-entry';
+    const dateStr = e.date ? new Date(e.date).toLocaleDateString(lang === 'sv' ? 'sv-SE' : 'en-GB', { day:'numeric', month:'long', year:'numeric' }) : '';
+    card.innerHTML = `
+      <div class="entry-header">
+        <div>
+          <div class="entry-location">📍 ${e.location}</div>
+          <div class="entry-date">${dateStr}</div>
+        </div>
+        <button class="entry-delete" onclick="deleteJournalEntry(${e.id})" title="Ta bort">✕</button>
+      </div>
+      <div class="entry-details">
+        ${e.amount ? `<span class="entry-tag gold">🍄 ${e.amount}</span>` : ''}
+      </div>
+      ${e.note ? `<div class="entry-note">"${e.note}"</div>` : ''}
+    `;
+    container.appendChild(card);
+  });
+
+  // Count
+  let countEl = container.querySelector('.journal-count');
+  if (!countEl) { countEl = document.createElement('div'); countEl.className = 'journal-count'; container.appendChild(countEl); }
+  countEl.textContent = lang === 'sv' ? `${entries.length} fynd loggade` : `${entries.length} finds logged`;
+}
+
+// ── TAB SWITCHING ───────────────────────────────────────────────
+function switchTab(tab) {
+  const mapPanel = document.getElementById('map-panel');
+  const journalPanel = document.getElementById('journal-panel');
+  const tabMap = document.getElementById('tab-map');
+  const tabJournal = document.getElementById('tab-journal');
+
+  if (tab === 'map') {
+    mapPanel.style.display = '';
+    journalPanel.classList.remove('visible');
+    tabMap.classList.add('active');
+    tabJournal.classList.remove('active');
+  } else {
+    mapPanel.style.display = 'none';
+    journalPanel.classList.add('visible');
+    tabMap.classList.remove('active');
+    tabJournal.classList.add('active');
+    // Set today's date as default
+    const dateField = document.getElementById('j-date');
+    if (!dateField.value) dateField.value = new Date().toISOString().slice(0,10);
+    renderJournal();
+  }
+}
+
+// Set journal placeholder translations
+const _origApply = applyTranslations;
+applyTranslations = function() {
+  _origApply();
+  const sv = lang === 'sv';
+  document.getElementById('tab-map-lbl').textContent = sv ? 'Karta' : 'Map';
+  document.getElementById('tab-journal-lbl').textContent = sv ? 'Min Journal' : 'My Journal';
+  document.getElementById('lbl-journal-add').textContent = sv ? '📍 Logga ett fynd' : '📍 Log a find';
+  document.getElementById('j-location').placeholder = sv ? 'Plats (t.ex. Dalaskogen)' : 'Location (e.g. Dalarna forest)';
+  document.getElementById('j-amount').placeholder = sv ? 'Antal (t.ex. 2 kg)' : 'Amount (e.g. 2 kg)';
+  document.getElementById('j-note').placeholder = sv ? 'Anteckning (valfritt)...' : 'Note (optional)...';
+  document.getElementById('j-add-btn').textContent = sv ? '＋ Spara fynd' : '＋ Save find';
+  document.getElementById('journal-empty-text').innerHTML = sv ? 'Inga fynd ännu.<br>Logga ditt första kantarellfynd!' : 'No finds yet.<br>Log your first chanterelle find!';
+  renderJournal();
+};
+
 </script>
 </body>
 </html>
