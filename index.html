@@ -895,6 +895,14 @@
       </div>
       <button class="modal-cta" id="modal-cta">Starta med Säsong – 249 kr/år</button>
       <div class="modal-fine" id="modal-fine">Avbryt när som helst · Säker betalning via Stripe</div>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--mist);">
+        <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-bottom:8px;" id="lbl-have-code">Har du redan en kod?</div>
+        <div style="display:flex;gap:8px;">
+          <input id="unlock-input" class="search-input" placeholder="Ange din premiumkod..." style="flex:1;font-size:13px;" />
+          <button onclick="tryUnlock()" style="background:var(--forest);color:var(--gold-pale);border:none;border-radius:8px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;white-space:nowrap;" id="unlock-btn">Lås upp</button>
+        </div>
+        <div id="unlock-msg" style="font-size:12px;margin-top:6px;text-align:center;min-height:16px;"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1322,6 +1330,7 @@ initMap();
 applyTranslations();
 renderChips();
 loadRegion('Dalarna');
+applyPremiumState(); // restore premium if already unlocked
 
 // ── SERVICE WORKER ──────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
@@ -1357,7 +1366,69 @@ function installApp() {
   });
 }
 
-// ── JOURNAL ─────────────────────────────────────────────────────
+// ── PREMIUM UNLOCK ──────────────────────────────────────────────
+// Add your secret codes here — you can have as many as you like!
+// When a subscriber pays, email them one of these codes.
+const PREMIUM_CODES = ['KANTARELL2024', 'GULD2024', 'SVAMP2024'];
+const PREMIUM_KEY = 'kantarell_premium_v1';
+
+function isPremium() {
+  return localStorage.getItem(PREMIUM_KEY) === 'true';
+}
+
+function tryUnlock() {
+  const input = document.getElementById('unlock-input').value.trim().toUpperCase();
+  const msg = document.getElementById('unlock-msg');
+  const sv = lang === 'sv';
+
+  if (PREMIUM_CODES.includes(input)) {
+    localStorage.setItem(PREMIUM_KEY, 'true');
+    msg.style.color = '#2a6020';
+    msg.textContent = sv ? '✓ Välkommen till Premium! Hela Sverige är upplåst.' : '✓ Welcome to Premium! All of Sweden is unlocked.';
+    setTimeout(() => {
+      closeModal();
+      applyPremiumState();
+    }, 1800);
+  } else {
+    msg.style.color = '#c04040';
+    msg.textContent = sv ? '✗ Ogiltig kod. Kontrollera och försök igen.' : '✗ Invalid code. Please check and try again.';
+    document.getElementById('unlock-input').style.borderColor = '#c04040';
+    setTimeout(() => {
+      document.getElementById('unlock-input').style.borderColor = '';
+      msg.textContent = '';
+    }, 2500);
+  }
+}
+
+// Allow pressing Enter in the code field
+document.getElementById('unlock-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') tryUnlock();
+});
+
+function applyPremiumState() {
+  if (!isPremium()) return;
+
+  // Unlock all regions
+  Object.keys(REGIONS).forEach(r => REGIONS[r].premium = false);
+
+  // Update banner
+  const sv = lang === 'sv';
+  document.getElementById('banner-text').textContent = sv ? '⭐ Premium aktiverat — hela Sverige upplåst!' : '⭐ Premium active — all of Sweden unlocked!';
+  document.getElementById('banner-cta').style.display = 'none';
+  document.querySelector('.premium-banner').style.background = 'linear-gradient(135deg, #2a6020, #3d7a2a)';
+
+  // Update header button
+  document.getElementById('sub-btn').textContent = sv ? '⭐ Premium' : '⭐ Premium';
+  document.getElementById('sub-btn').style.background = '#c8901a';
+  document.getElementById('sub-btn').onclick = () => {
+    const sv = lang === 'sv';
+    alert(sv ? '⭐ Du är Premium-medlem! Hela Sverige är upplåst.' : '⭐ You are a Premium member! All of Sweden is unlocked.');
+  };
+
+  // Re-render chips without locks
+  renderChips();
+}
+
 const JOURNAL_KEY = 'kantarell_journal_v1';
 
 function loadJournal() {
@@ -1487,6 +1558,9 @@ applyTranslations = function() {
   document.getElementById('j-note').placeholder = sv ? 'Anteckning (valfritt)...' : 'Note (optional)...';
   document.getElementById('j-add-btn').textContent = sv ? '＋ Spara fynd' : '＋ Save find';
   document.getElementById('journal-empty-text').innerHTML = sv ? 'Inga fynd ännu.<br>Logga ditt första kantarellfynd!' : 'No finds yet.<br>Log your first chanterelle find!';
+  document.getElementById('lbl-have-code').textContent = sv ? 'Har du redan en kod?' : 'Already have a code?';
+  document.getElementById('unlock-input').placeholder = sv ? 'Ange din premiumkod...' : 'Enter your premium code...';
+  document.getElementById('unlock-btn').textContent = sv ? 'Lås upp' : 'Unlock';
   renderJournal();
 };
 
