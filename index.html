@@ -819,6 +819,10 @@
         <span class="cond-label" id="cond-trend-lbl">Regntrend</span>
         <span class="cond-pill" id="cond-trend">—</span>
       </div>
+      <div class="condition-row">
+        <span class="cond-label" id="cond-cloud-lbl">Molntäcke</span>
+        <span class="cond-pill" id="cond-cloud">—</span>
+      </div>
     </div>
     </div> <!-- end map-panel -->
 
@@ -932,6 +936,7 @@ const T = {
     condTemp: 'Temperatur',
     condSeason: 'Säsong',
     condTrend: 'Regntrend',
+    condCloud: 'Molntäcke',
     legendTitle: 'Sannolikhet',
     legExc: 'Utmärkt (80%+)',
     legGood: 'Bra (60–79%)',
@@ -989,6 +994,7 @@ const T = {
     condTemp: 'Temperature',
     condSeason: 'Season',
     condTrend: 'Rain trend',
+    condCloud: 'Cloud cover',
     legendTitle: 'Likelihood',
     legExc: 'Excellent (80%+)',
     legGood: 'Good (60–79%)',
@@ -1075,6 +1081,7 @@ function applyTranslations() {
   document.getElementById('cond-temp-lbl').textContent = t.condTemp;
   document.getElementById('cond-season-lbl').textContent = t.condSeason;
   document.getElementById('cond-trend-lbl').textContent = t.condTrend;
+  document.getElementById('cond-cloud-lbl').textContent = t.condCloud;
   document.getElementById('lbl-legend').textContent = t.legendTitle;
   document.getElementById('leg-exc').textContent = t.legExc;
   document.getElementById('leg-good').textContent = t.legGood;
@@ -1135,18 +1142,27 @@ function scoreColor(s) {
 function addMapMarkers(scores) {
   markers.forEach(m => m.remove());
   markers = [];
-  Object.entries(scores).forEach(([region, score]) => {
+  Object.entries(scores).forEach(([region, data]) => {
     const reg = REGIONS[region];
     if (!reg) return;
+    const score = typeof data === 'object' ? data.score : data;
+    const cloudcover = typeof data === 'object' ? data.cloudcover : null;
     const color = scoreColor(score);
+    const cloudIcon = cloudcover !== null
+      ? (cloudcover >= 70 ? '☁️' : cloudcover >= 40 ? '⛅' : '☀️')
+      : '';
     const icon = L.divIcon({
       className: '',
-      html: `<div style="background:${color};color:white;border-radius:50%;width:46px;height:46px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);cursor:pointer;">${score}%</div>`,
+      html: `<div style="background:${color};color:white;border-radius:50%;width:46px;height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);cursor:pointer;line-height:1.2;">
+        <span>${score}%</span>
+        ${cloudIcon ? `<span style="font-size:10px;">${cloudIcon}</span>` : ''}
+      </div>`,
       iconSize: [46, 46],
       iconAnchor: [23, 23],
     });
+    const cloudText = cloudcover !== null ? `<br>☁️ ${cloudcover}% molntäcke` : '';
     const marker = L.marker([reg.lat, reg.lng], { icon }).addTo(map);
-    marker.bindPopup(`<b>${region}</b><br>🍄 ${score}% likelihood`);
+    marker.bindPopup(`<b>${region}</b><br>🍄 ${score}% sannolikhet${cloudText}`);
     marker.on('click', () => {
       if (reg.premium) { openModal(); return; }
       selectedRegion = region;
@@ -1159,7 +1175,7 @@ function addMapMarkers(scores) {
 
 // ── WEATHER API ────────────────────────────────────────────────
 async function fetchWeather(lat, lng) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=precipitation_sum,temperature_2m_max,temperature_2m_min&hourly=relative_humidity_2m&current=temperature_2m,relative_humidity_2m,precipitation&timezone=Europe%2FStockholm&past_days=7&forecast_days=1`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=precipitation_sum,temperature_2m_max,temperature_2m_min&hourly=relative_humidity_2m,cloudcover&current=temperature_2m,relative_humidity_2m,precipitation,cloudcover&timezone=Europe%2FStockholm&past_days=7&forecast_days=1`;
   const res = await fetch(url);
   return res.json();
 }
@@ -1173,29 +1189,36 @@ function calcScore(data) {
   const month = new Date().getMonth() + 1;
   const inSeason = month >= 6 && month <= 10;
 
+  const cloudcover = data.current.cloudcover ?? 50;
+
   let score = 0;
   // Rainfall score (ideal: 20-60mm over 7 days)
-  if (total7 >= 20 && total7 <= 60) score += 40;
-  else if (total7 >= 10 && total7 < 20) score += 25;
-  else if (total7 > 60 && total7 <= 90) score += 30;
-  else if (total7 > 90) score += 15;
+  if (total7 >= 20 && total7 <= 60) score += 35;
+  else if (total7 >= 10 && total7 < 20) score += 22;
+  else if (total7 > 60 && total7 <= 90) score += 27;
+  else if (total7 > 90) score += 13;
   else score += 5;
 
   // Temperature score (ideal: 15-22°C)
-  if (avgTemp >= 15 && avgTemp <= 22) score += 30;
-  else if (avgTemp >= 10 && avgTemp < 15) score += 20;
-  else if (avgTemp > 22 && avgTemp <= 26) score += 15;
+  if (avgTemp >= 15 && avgTemp <= 22) score += 28;
+  else if (avgTemp >= 10 && avgTemp < 15) score += 18;
+  else if (avgTemp > 22 && avgTemp <= 26) score += 13;
   else score += 5;
 
   // Humidity
-  if (humidity >= 70) score += 20;
-  else if (humidity >= 55) score += 12;
-  else score += 4;
+  if (humidity >= 70) score += 17;
+  else if (humidity >= 55) score += 10;
+  else score += 3;
+
+  // Cloud cover bonus (overcast/cloudy after rain = ideal for kantareller)
+  if (cloudcover >= 70) score += 10;
+  else if (cloudcover >= 40) score += 6;
+  else score += 2;
 
   // Season bonus
   if (inSeason) score += 10;
 
-  return { score: Math.min(98, Math.max(5, score)), total7, avgTemp, humidity, past7, inSeason };
+  return { score: Math.min(98, Math.max(5, score)), total7, avgTemp, humidity, cloudcover, past7, inSeason };
 }
 
 // ── LOAD REGION ─────────────────────────────────────────────────
@@ -1207,7 +1230,7 @@ async function loadRegion(name) {
 
   try {
     const data = await fetchWeather(reg.lat, reg.lng);
-    const { score, total7, avgTemp, humidity, past7, inSeason } = calcScore(data);
+    const { score, total7, avgTemp, humidity, cloudcover, past7, inSeason } = calcScore(data);
     const t = T[lang];
 
     // Score display
@@ -1260,17 +1283,26 @@ async function loadRegion(name) {
     setCondition('cond-season', seasonCond());
     setCondition('cond-trend', trend);
 
+    // Cloud cover condition
+    const cloudCond = cloudcover >= 70
+      ? ['pill-green', (lang === 'sv' ? `☁️ Mycket molnigt (${cloudcover}%)` : `☁️ Very cloudy (${cloudcover}%)`)]
+      : cloudcover >= 40
+      ? ['pill-yellow', (lang === 'sv' ? `⛅ Delvis molnigt (${cloudcover}%)` : `⛅ Partly cloudy (${cloudcover}%)`)]
+      : ['pill-red', (lang === 'sv' ? `☀️ Klart (${cloudcover}%)` : `☀️ Clear sky (${cloudcover}%)`)];
+    setCondition('cond-cloud', cloudCond);
+
     // Map markers — fetch scores for all free regions
     const scores = {};
     for (const [rname, rdata] of Object.entries(REGIONS)) {
       if (!rdata.premium) {
-        if (rname === name) { scores[rname] = score; continue; }
+        if (rname === name) { scores[rname] = { score, cloudcover }; continue; }
         try {
           const d2 = await fetchWeather(rdata.lat, rdata.lng);
-          scores[rname] = calcScore(d2).score;
-        } catch { scores[rname] = 50; }
+          const r2 = calcScore(d2);
+          scores[rname] = { score: r2.score, cloudcover: r2.cloudcover };
+        } catch { scores[rname] = { score: 50, cloudcover: null }; }
       } else {
-        scores[rname] = Math.floor(Math.random() * 40) + 40;
+        scores[rname] = { score: Math.floor(Math.random() * 40) + 40, cloudcover: null };
       }
     }
     addMapMarkers(scores);
