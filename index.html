@@ -1130,6 +1130,8 @@ function initMap() {
     attribution: '© OpenStreetMap',
     maxZoom: 18
   }).addTo(map);
+  // Try GPS on load
+  locateAndBuildGrid();
 }
 
 function scoreColor(s) {
@@ -1139,7 +1141,160 @@ function scoreColor(s) {
   return '#c04040';
 }
 
-function addMapMarkers(scores) {
+function scoreColorAlpha(s) {
+  if (s >= 80) return 'rgba(42,122,58,0.72)';
+  if (s >= 60) return 'rgba(90,170,74,0.72)';
+  if (s >= 40) return 'rgba(232,160,32,0.72)';
+  return 'rgba(192,64,64,0.72)';
+}
+
+/* ── LOCAL GRID MAP ─────────────────────────────────────────── */
+
+// Generate a grid of lat/lng points within ~radiusKm of a centre
+function buildGrid(centerLat, centerLng, radiusKm, stepKm) {
+  const points = [];
+  const degLat = stepKm / 111;          // 1° lat ≈ 111 km
+  const degLng = stepKm / (111 * Math.cos(centerLat * Math.PI / 180));
+  const stepsLat = Math.ceil(radiusKm / stepKm);
+  const stepsLng = Math.ceil(radiusKm / stepKm);
+
+  for (let i = -stepsLat; i <= stepsLat; i++) {
+    for (let j = -stepsLng; j <= stepsLng; j++) {
+      const lat = centerLat + i * degLat;
+      const lng = centerLng + j * degLng;
+      const distKm = Math.hypot(i * stepKm, j * stepKm);
+      if (distKm <= radiusKm) points.push({ lat, lng });
+    }
+  }
+  return points;
+}
+
+// Fetch weather for an array of points in small parallel batches
+async function fetchGridScores(points) {
+  const BATCH = 6;
+  const results = [];
+  for (let i = 0; i < points.length; i += BATCH) {
+    const batch = points.slice(i, i + BATCH);
+    const settled = await Promise.allSettled(batch.map(async p => {
+      const data = await fetchWeather(p.lat, p.lng);
+      const { score, cloudcover } = calcScore(data);
+      return { lat: p.lat, lng: p.lng, score, cloudcover };
+    }));
+    settled.forEach((r, idx) => {
+      if (r.status === 'fulfilled') results.push(r.value);
+      else results.push({ ...batch[idx], score: 50, cloudcover: null });
+    });
+  }
+  return results;
+}
+
+// Render heatmap circles on the map
+function renderGridMarkers(gridResults, userLat, userLng) {
+  markers.forEach(m => m.remove());
+  markers = [];
+
+  // Draw heatmap circles (large, semi-transparent)
+  gridResults.forEach(({ lat, lng, score, cloudcover }) => {
+    const circle = L.circle([lat, lng], {
+      radius: 12000,           // ~12km radius per point
+      color: 'transparent',
+      fillColor: scoreColorAlpha(score),
+      fillOpacity: 0.55,
+      interactive: true
+    }).addTo(map);
+
+    const sv = lang === 'sv';
+    const cloudIcon = cloudcover !== null
+      ? (cloudcover >= 70 ? '☁️' : cloudcover >= 40 ? '⛅' : '☀️') : '';
+    const emoji = score >= 80 ? '🍄🍄🍄' : score >= 60 ? '🍄🍄' : score >= 40 ? '🍄' : '🌵';
+    circle.bindPopup(
+      `<b>${emoji} ${score}%</b><br>` +
+      (sv ? 'Kantarellsannolikhet' : 'Chanterelle likelihood') +
+      (cloudcover !== null ? `<br>${cloudIcon} ${cloudcover}% ` + (sv ? 'molntäcke' : 'cloud cover') : '')
+    );
+    markers.push(circle);
+  });
+
+  // User location pin
+  if (userLat !== null) {
+    const userIcon = L.divIcon({
+      className: '',
+      html: `<div style="background:#2d4a1e;border:3px solid #e8b84b;border-radius:50%;width:18px;height:18px;box-shadow:0 0 0 4px rgba(45,74,30,0.25);"></div>`,
+      iconSize: [18, 18],
+      iconAnchor: [9, 9]
+    });
+    const pin = L.marker([userLat, userLng], { icon: userIcon }).addTo(map);
+    pin.bindPopup(lang === 'sv' ? '📍 Du är här' : '📍 You are here');
+    markers.push(pin);
+  }
+}
+
+// Main entry: get GPS → build grid → fetch → render
+let gridLoading = false;
+async function locateAndBuildGrid() {
+  if (gridLoading) return;
+  if (!navigator.geolocation) { showRegionOverview(); return; }
+
+  const sv = lang === 'sv';
+  const loadingEl = document.getElementById('loading');
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      gridLoading = true;
+      loadingEl.style.display = 'flex';
+      const { latitude: lat, longitude: lng } = pos.coords;
+      lastUserLat = lat; lastUserLng = lng;
+
+      map.setView([lat, lng], 10);
+
+      // Build a ~80km grid with 20km steps → roughly 25 points
+      const points = buildGrid(lat, lng, 80, 20);
+
+      try {
+        const results = await fetchGridScores(points);
+        renderGridMarkers(results, lat, lng);
+
+        // Also load nearest region panel data
+        let nearest = 'Dalarna', minDist = Infinity;
+        Object.entries(REGIONS).forEach(([name, r]) => {
+          const d = Math.hypot(r.lat - lat, r.lng - lng);
+          if (d < minDist) { minDist = d; nearest = name; }
+        });
+        selectedRegion = nearest;
+        renderChips();
+        loadRegion(nearest);
+      } catch(e) {
+        console.error(e);
+        showRegionOverview();
+      } finally {
+        gridLoading = false;
+        loadingEl.style.display = 'none';
+      }
+    },
+    () => {
+      // GPS denied — fall back to Sweden overview
+      showRegionOverview();
+    },
+    { timeout: 8000, maximumAge: 60000 }
+  );
+}
+
+// Fallback: show the old regional markers for Sweden overview
+async function showRegionOverview() {
+  const scores = {};
+  for (const [rname, rdata] of Object.entries(REGIONS)) {
+    try {
+      const d = await fetchWeather(rdata.lat, rdata.lng);
+      const r = calcScore(d);
+      scores[rname] = { score: r.score, cloudcover: r.cloudcover };
+    } catch { scores[rname] = { score: 50, cloudcover: null }; }
+  }
+  addRegionMarkers(scores);
+  map.setView([62, 15], 5);
+}
+
+// Old-style regional markers (used as fallback)
+function addRegionMarkers(scores) {
   markers.forEach(m => m.remove());
   markers = [];
   Object.entries(scores).forEach(([region, data]) => {
@@ -1149,8 +1304,7 @@ function addMapMarkers(scores) {
     const cloudcover = typeof data === 'object' ? data.cloudcover : null;
     const color = scoreColor(score);
     const cloudIcon = cloudcover !== null
-      ? (cloudcover >= 70 ? '☁️' : cloudcover >= 40 ? '⛅' : '☀️')
-      : '';
+      ? (cloudcover >= 70 ? '☁️' : cloudcover >= 40 ? '⛅' : '☀️') : '';
     const icon = L.divIcon({
       className: '',
       html: `<div style="background:${color};color:white;border-radius:50%;width:46px;height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);cursor:pointer;line-height:1.2;">
@@ -1164,7 +1318,6 @@ function addMapMarkers(scores) {
     const marker = L.marker([reg.lat, reg.lng], { icon }).addTo(map);
     marker.bindPopup(`<b>${region}</b><br>🍄 ${score}% sannolikhet${cloudText}`);
     marker.on('click', () => {
-      if (reg.premium) { openModal(); return; }
       selectedRegion = region;
       renderChips();
       loadRegion(region);
@@ -1172,6 +1325,16 @@ function addMapMarkers(scores) {
     markers.push(marker);
   });
 }
+
+// Keep addMapMarkers name working (called after loadRegion)
+function addMapMarkers(scores) {
+  // When a region is loaded from the chips, refresh local grid if we have GPS
+  // otherwise fall back to regional view
+  if (lastUserLat !== null) return; // grid already showing, don't clobber it
+  addRegionMarkers(scores);
+}
+
+let lastUserLat = null, lastUserLng = null;
 
 // ── WEATHER API ────────────────────────────────────────────────
 async function fetchWeather(lat, lng) {
@@ -1323,22 +1486,8 @@ function setCondition(id, [cls, label]) {
 
 // ── LOCATE ─────────────────────────────────────────────────────
 function locateMe() {
-  if (!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(pos => {
-    const { latitude: lat, longitude: lng } = pos.coords;
-    map.setView([lat, lng], 9);
-    // Find nearest region
-    let nearest = 'Dalarna', minDist = Infinity;
-    Object.entries(REGIONS).forEach(([name, r]) => {
-      const d = Math.hypot(r.lat - lat, r.lng - lng);
-      if (d < minDist) { minDist = d; nearest = name; }
-    });
-    if (!REGIONS[nearest].premium) {
-      selectedRegion = nearest;
-      renderChips();
-      loadRegion(nearest);
-    }
-  });
+  gridLoading = false; // reset so it can run again
+  locateAndBuildGrid();
 }
 
 // ── SEARCH ─────────────────────────────────────────────────────
