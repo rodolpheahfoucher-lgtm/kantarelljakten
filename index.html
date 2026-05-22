@@ -729,7 +729,7 @@
 <div class="premium-banner">
   <div style="display:flex;align-items:center;">
     <span class="premium-badge">Free</span>
-    <span class="premium-text" id="banner-text">Du ser 3 regioner gratis. Lås upp hela Sverige.</span>
+    <span class="premium-text" id="banner-text">🍄 30 dagar gratis provperiod — hela Sverige upplåst!</span>
   </div>
   <span class="premium-cta" onclick="openModal()" id="banner-cta">Uppgradera →</span>
 </div>
@@ -1043,11 +1043,11 @@ const REGIONS = {
   Värmland:     { lat: 59.7, lng: 13.2, premium: false },
   Norrland:     { lat: 64.5, lng: 18.0, premium: false },
   Södermanland: { lat: 59.0, lng: 16.7, premium: false },
-  Småland:      { lat: 57.0, lng: 14.8, premium: true },
-  Skåne:        { lat: 55.9, lng: 13.5, premium: true },
-  Gotland:      { lat: 57.5, lng: 18.5, premium: true },
-  Jämtland:     { lat: 63.2, lng: 14.6, premium: true },
-  Uppland:      { lat: 59.9, lng: 17.8, premium: true },
+  Småland:      { lat: 57.0, lng: 14.8, premium: false },
+  Skåne:        { lat: 55.9, lng: 13.5, premium: false },
+  Gotland:      { lat: 57.5, lng: 18.5, premium: false },
+  Jämtland:     { lat: 63.2, lng: 14.6, premium: false },
+  Uppland:      { lat: 59.9, lng: 17.8, premium: false },
 };
 
 // ── LANG ───────────────────────────────────────────────────────
@@ -1404,10 +1404,83 @@ function installApp() {
 // Add your secret codes here — you can have as many as you like!
 // When a subscriber pays, email them one of these codes.
 const PREMIUM_CODES = ['KANTARELL2024', 'GULD2024', 'SVAMP2024'];
-const PREMIUM_KEY = 'kantarell_premium_v1';
+const PREMIUM_KEY  = 'kantarell_premium_v1';
+const TRIAL_KEY    = 'kantarell_trial_start_v1';
+const TRIAL_DAYS   = 30;
+
+/* ── TRIAL HELPERS ───────────────────────────────────────────── */
+function getTrialStart() {
+  let ts = localStorage.getItem(TRIAL_KEY);
+  if (!ts) {
+    ts = Date.now().toString();
+    localStorage.setItem(TRIAL_KEY, ts);
+  }
+  return parseInt(ts, 10);
+}
+
+function daysRemaining() {
+  const elapsed = (Date.now() - getTrialStart()) / (1000 * 60 * 60 * 24);
+  return Math.max(0, Math.ceil(TRIAL_DAYS - elapsed));
+}
+
+function trialActive() {
+  return daysRemaining() > 0;
+}
 
 function isPremium() {
   return localStorage.getItem(PREMIUM_KEY) === 'true';
+}
+
+function hasAccess() {
+  return isPremium() || trialActive();
+}
+
+/* ── BANNER STATE ────────────────────────────────────────────── */
+function updateTrialBanner() {
+  const sv = lang === 'sv';
+  const banner = document.querySelector('.premium-banner');
+  const bannerText = document.getElementById('banner-text');
+  const bannerCta  = document.getElementById('banner-cta');
+
+  if (isPremium()) {
+    bannerText.textContent = sv ? '⭐ Premium aktiverat — hela Sverige upplåst!' : '⭐ Premium active — all of Sweden unlocked!';
+    bannerCta.style.display = 'none';
+    banner.style.background = 'linear-gradient(135deg, #2a6020, #3d7a2a)';
+    return;
+  }
+
+  const days = daysRemaining();
+
+  if (days <= 0) {
+    // Trial expired — lock everything
+    Object.keys(REGIONS).forEach(r => REGIONS[r].premium = true);
+    bannerText.textContent = sv ? '⏰ Din provperiod har gått ut. Prenumerera för att fortsätta.' : '⏰ Your free trial has expired. Subscribe to continue.';
+    bannerCta.style.display = '';
+    bannerCta.textContent = sv ? 'Prenumerera →' : 'Subscribe →';
+    banner.style.background = 'linear-gradient(135deg, #8b1a1a, #a02020)';
+    openModal();
+    return;
+  }
+
+  // Trial active
+  Object.keys(REGIONS).forEach(r => REGIONS[r].premium = false);
+
+  if (days <= 7) {
+    // Urgent — amber warning
+    bannerText.textContent = sv
+      ? `⚠️ ${days} dag${days === 1 ? '' : 'ar'} kvar av din provperiod.`
+      : `⚠️ ${days} day${days === 1 ? '' : 's'} left in your free trial.`;
+    banner.style.background = 'linear-gradient(135deg, #8b5a00, #b07800)';
+  } else {
+    // Plenty of time — neutral green
+    bannerText.textContent = sv
+      ? `🍄 ${days} dagar kvar av din kostnadsfria provperiod — hela Sverige upplåst!`
+      : `🍄 ${days} days left in your free trial — all of Sweden unlocked!`;
+    banner.style.background = '';
+  }
+
+  bannerCta.style.display = '';
+  bannerCta.textContent = sv ? 'Uppgradera →' : 'Upgrade →';
 }
 
 function tryUnlock() {
@@ -1440,26 +1513,30 @@ document.getElementById('unlock-input').addEventListener('keydown', e => {
 });
 
 function applyPremiumState() {
-  if (!isPremium()) return;
-
-  // Unlock all regions
-  Object.keys(REGIONS).forEach(r => REGIONS[r].premium = false);
-
-  // Update banner
   const sv = lang === 'sv';
-  document.getElementById('banner-text').textContent = sv ? '⭐ Premium aktiverat — hela Sverige upplåst!' : '⭐ Premium active — all of Sweden unlocked!';
-  document.getElementById('banner-cta').style.display = 'none';
-  document.querySelector('.premium-banner').style.background = 'linear-gradient(135deg, #2a6020, #3d7a2a)';
+  updateTrialBanner();
 
-  // Update header button
-  document.getElementById('sub-btn').textContent = sv ? '⭐ Premium' : '⭐ Premium';
-  document.getElementById('sub-btn').style.background = '#c8901a';
-  document.getElementById('sub-btn').onclick = () => {
-    const sv = lang === 'sv';
-    alert(sv ? '⭐ Du är Premium-medlem! Hela Sverige är upplåst.' : '⭐ You are a Premium member! All of Sweden is unlocked.');
-  };
+  if (isPremium()) {
+    Object.keys(REGIONS).forEach(r => REGIONS[r].premium = false);
+    document.getElementById('sub-btn').textContent = '⭐ Premium';
+    document.getElementById('sub-btn').style.background = '#c8901a';
+    document.getElementById('sub-btn').onclick = () => {
+      alert(sv ? '⭐ Du är Premium-medlem! Hela Sverige är upplåst.' : '⭐ You are a Premium member! All of Sweden is unlocked.');
+    };
+  } else if (trialActive()) {
+    const days = daysRemaining();
+    document.getElementById('sub-btn').textContent = sv ? `🍄 ${days}d kvar` : `🍄 ${days}d left`;
+    document.getElementById('sub-btn').style.background = days <= 7 ? '#8b5a00' : '';
+    document.getElementById('sub-btn').onclick = openModal;
+  } else {
+    // Trial expired — force modal
+    Object.keys(REGIONS).forEach(r => REGIONS[r].premium = true);
+    document.getElementById('sub-btn').textContent = sv ? 'Prenumerera' : 'Subscribe';
+    document.getElementById('sub-btn').style.background = '#8b1a1a';
+    document.getElementById('sub-btn').onclick = openModal;
+    openModal();
+  }
 
-  // Re-render chips without locks
   renderChips();
 }
 
