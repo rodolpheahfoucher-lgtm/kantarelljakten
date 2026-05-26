@@ -8,6 +8,22 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Kantarelljakten</title>
 
+<!-- Open Graph / Social Media Sharing -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kantarelljakten.se">
+<meta property="og:title" content="Kantarelljakten 🍄 — Din guide till kantarelljakten">
+<meta property="og:description" content="Hitta kantareller var som helst i Sverige! Dagliga väderanalyser, sannolikhetskarta och tips för nybörjare. Prova gratis i 7 dagar.">
+<meta property="og:image" content="https://raw.githubusercontent.com/rodolpheahfoucher-lgtm/kantarelljakten/main/Kanterell-1.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="sv_SE">
+
+<!-- Twitter / X Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Kantarelljakten 🍄 — Din guide till kantarelljakten">
+<meta name="twitter:description" content="Hitta kantareller var som helst i Sverige! Dagliga väderanalyser, sannolikhetskarta och tips för nybörjare. Prova gratis i 7 dagar.">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/rodolpheahfoucher-lgtm/kantarelljakten/main/Kanterell-1.jpg">
+
 <!-- PWA Manifest -->
 <link rel="manifest" href="/manifest.json">
 
@@ -1598,8 +1614,16 @@ let lastUserLat = null, lastUserLng = null;
 // ── WEATHER API ────────────────────────────────────────────────
 async function fetchWeather(lat, lng) {
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=precipitation_sum,temperature_2m_max,temperature_2m_min&hourly=relative_humidity_2m,cloudcover&current=temperature_2m,relative_humidity_2m,precipitation,cloudcover&timezone=Europe%2FStockholm&past_days=7&forecast_days=1`;
-  const res = await fetch(url);
-  return res.json();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+    return res.json();
+  } catch (e) {
+    clearTimeout(timeout);
+    throw e;
+  }
 }
 
 function calcScore(data) {
@@ -1713,20 +1737,23 @@ async function loadRegion(name) {
       : ['pill-red', (lang === 'sv' ? `☀️ Klart (${cloudcover}%)` : `☀️ Clear sky (${cloudcover}%)`)];
     setCondition('cond-cloud', cloudCond);
 
-    // Map markers — fetch scores for all free regions
+    // Map markers — fetch scores for all free regions in parallel
     const scores = {};
-    for (const [rname, rdata] of Object.entries(REGIONS)) {
-      if (!rdata.premium) {
-        if (rname === name) { scores[rname] = { score, cloudcover }; continue; }
-        try {
-          const d2 = await fetchWeather(rdata.lat, rdata.lng);
-          const r2 = calcScore(d2);
-          scores[rname] = { score: r2.score, cloudcover: r2.cloudcover };
-        } catch { scores[rname] = { score: 50, cloudcover: null }; }
-      } else {
-        scores[rname] = { score: Math.floor(Math.random() * 40) + 40, cloudcover: null };
-      }
-    }
+    scores[name] = { score, cloudcover };
+    const markerPromises = Object.entries(REGIONS)
+      .filter(([rname, rdata]) => rname !== name)
+      .map(async ([rname, rdata]) => {
+        if (!rdata.premium) {
+          try {
+            const d2 = await fetchWeather(rdata.lat, rdata.lng);
+            const r2 = calcScore(d2);
+            scores[rname] = { score: r2.score, cloudcover: r2.cloudcover };
+          } catch { scores[rname] = { score: 50, cloudcover: null }; }
+        } else {
+          scores[rname] = { score: Math.floor(Math.random() * 40) + 40, cloudcover: null };
+        }
+      });
+    await Promise.all(markerPromises);
     addMapMarkers(scores);
     map.setView([reg.lat, reg.lng], 7, { animate: true });
 
@@ -2119,7 +2146,7 @@ function applyGuideTranslations() {
     fSmell:         sv ? 'Svag, ibland jordaktig – ingen fruktig doft'                 : 'Faint, sometimes earthy – no fruity scent',
     keyLbl:         sv ? '🔑 Viktigaste tecknet'                                        : '🔑 Key difference',
     keyTitle:       sv ? 'Titta på skivorna!'                                           : 'Look at the gills!',
-    keyText:        sv ? 'Den äkta kantarellens "skivor" är egentligen tjocka, trubbiga <strong>ribbor</strong> som grenar sig och löper ned längs skaftet. De är svåra att skilja från hattköttet. Den falska kantarellens skivor är <strong>tunna och täta</strong> – precis som en vanlig champinjon. Detta är den enklaste och säkraste skillnaden.' : 'The real chanterelle's "gills" are actually thick, blunt <strong>ridges</strong> that fork and run down the stem. They are hard to separate from the cap flesh. The false chanterelle has <strong>thin, crowded</strong> true gills – just like a regular mushroom. This is the easiest and most reliable difference.',
+    keyText:        sv ? 'Den äkta kantarellens "skivor" är egentligen tjocka, trubbiga <strong>ribbor</strong> som grenar sig och löper ned längs skaftet. De är svåra att skilja från hattköttet. Den falska kantarellens skivor är <strong>tunna och täta</strong> – precis som en vanlig champinjon. Detta är den enklaste och säkraste skillnaden.' : "The real chanterelle's \"gills\" are actually thick, blunt <strong>ridges</strong> that fork and run down the stem. They are hard to separate from the cap flesh. The false chanterelle has <strong>thin, crowded</strong> true gills – just like a regular mushroom. This is the easiest and most reliable difference.",
     smellSectionLbl:sv ? '👃 Luktprovet'                                                : '👃 The smell test',
     realSmellLbl:   sv ? 'Äkta kantarell'                                               : 'Real chanterelle',
     fakeSmellLbl:   sv ? 'Falsk kantarell'                                              : 'False chanterelle',
