@@ -1606,18 +1606,9 @@ function renderGridMarkers(gridResults, userLat, userLng) {
       interactive: true
     }).addTo(map);
 
-    const sv = lang === 'sv';
-    const cloudIcon = cloudcover !== null
-      ? (cloudcover >= 70 ? '☁️' : cloudcover >= 40 ? '⛅' : '☀️') : '';
-    const emoji = score >= 80 ? '🍄🍄🍄' : score >= 60 ? '🍄🍄' : score >= 40 ? '🍄' : '🌵';
-    const exploreLbl = sv ? 'Utforska denna plats →' : 'Explore this spot →';
-    circle.bindPopup(
-      `<b>${emoji} ${score}%</b><br>` +
-      (sv ? 'Kantarellsannolikhet' : 'Chanterelle likelihood') +
-      (cloudcover !== null ? `<br>${cloudIcon} ${cloudcover}% ` + (sv ? 'molntäcke' : 'cloud cover') : '') +
-      `<br><button class="explore-btn" onclick="openLocalMap(${lat},${lng},${score},${total7??'undefined'},${avgTemp??'undefined'},${humidity??'undefined'})">` +
-      `${exploreLbl}</button>`
-    );
+    circle.on('click', () => {
+      openLocalMap(lat, lng, score, total7 ?? undefined, avgTemp ?? undefined, humidity ?? undefined);
+    });
     markers.push(circle);
   });
 
@@ -1720,18 +1711,12 @@ function addRegionMarkers(scores) {
       iconSize: [46, 46],
       iconAnchor: [23, 23],
     });
-    const cloudText = cloudcover !== null ? `<br>☁️ ${cloudcover}% molntäcke` : '';
-    const exploreLbl = lang === 'sv' ? 'Utforska denna plats →' : 'Explore this spot →';
     const marker = L.marker([reg.lat, reg.lng], { icon }).addTo(map);
-    marker.bindPopup(
-      `<b>${region}</b><br>🍄 ${score}% sannolikhet${cloudText}` +
-      `<br><button class="explore-btn" onclick="openLocalMap(${reg.lat},${reg.lng},${score})">` +
-      `${exploreLbl}</button>`
-    );
     marker.on('click', () => {
       selectedRegion = region;
       renderChips();
       loadRegion(region);
+      openLocalMap(reg.lat, reg.lng, score);
     });
     markers.push(marker);
   });
