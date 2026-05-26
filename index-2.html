@@ -604,6 +604,137 @@
   }
   .journal-panel.visible { display: flex; }
 
+  /* GUIDE PANEL */
+  .guide-panel {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    background: white;
+  }
+  .guide-panel.visible { display: flex; }
+  .guide-header {
+    padding: 16px;
+    background: var(--forest);
+    color: var(--gold-pale);
+    text-align: center;
+  }
+  .guide-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-bottom: 4px;
+  }
+  .guide-header p {
+    font-size: 12px;
+    color: rgba(245,228,176,0.7);
+    line-height: 1.4;
+  }
+  .guide-section {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--mist);
+  }
+  .guide-section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  .mushroom-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 2px;
+  }
+  .mushroom-card {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid transparent;
+  }
+  .mushroom-card.real { border-color: #4a9e6b; }
+  .mushroom-card.fake { border-color: #c04040; }
+  .mushroom-card-header {
+    padding: 8px 10px;
+    font-weight: 700;
+    font-size: 12px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+  .mushroom-card.real .mushroom-card-header { background: #e8f5ee; color: #2a6040; }
+  .mushroom-card.fake .mushroom-card-header { background: #fde8e8; color: #a02020; }
+  .mushroom-card-body {
+    padding: 10px;
+    background: var(--cream);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .trait-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: flex-start;
+  }
+  .trait-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .trait-text { font-size: 12px; line-height: 1.4; }
+  .trait-label { font-weight: 600; color: var(--text); }
+  .trait-desc { color: var(--text-muted); }
+  .danger-box {
+    background: #fde8e8;
+    border: 1.5px solid #e08080;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 4px;
+  }
+  .danger-box-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: #a02020;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .danger-box p { font-size: 12px; color: #6a2020; line-height: 1.5; }
+  .tip-box {
+    background: #e8f5ee;
+    border: 1.5px solid #70c090;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 4px;
+  }
+  .tip-box-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: #2a6040;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tip-box p { font-size: 12px; color: #1a4030; line-height: 1.5; }
+  .tip-list { font-size: 12px; color: #1a4030; line-height: 1.6; padding-left: 4px; }
+  .tip-list li { margin-bottom: 2px; list-style: none; padding-left: 4px; }
+  .tip-list li::before { content: "✓ "; color: #4a9e6b; font-weight: 700; }
+  .smell-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 4px;
+    margin-top: 4px;
+  }
+  .smell-real { background: #e8f5ee; color: #2a6040; border: 1px solid #70c090; }
+  .smell-fake { background: #fff5e0; color: #7a5000; border: 1px solid #e0a840; }
+
+
   .journal-add {
     padding: 14px 16px;
     border-bottom: 1px solid var(--mist);
@@ -729,7 +860,7 @@
 <div class="premium-banner">
   <div style="display:flex;align-items:center;">
     <span class="premium-badge">Free</span>
-    <span class="premium-text" id="banner-text">🍄 30 dagar gratis provperiod — hela Sverige upplåst!</span>
+    <span class="premium-text" id="banner-text">🍄 7 dagar gratis — hela Sverige upplåst!</span>
   </div>
   <span class="premium-cta" onclick="openModal()" id="banner-cta">Uppgradera →</span>
 </div>
@@ -741,6 +872,7 @@
     <div class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('map')" id="tab-map">🗺 <span id="tab-map-lbl">Karta</span></button>
       <button class="tab-btn" onclick="switchTab('journal')" id="tab-journal">📓 <span id="tab-journal-lbl">Min Journal</span></button>
+      <button class="tab-btn" onclick="switchTab('guide')" id="tab-guide">🍄 <span id="tab-guide-lbl">Lär dig</span></button>
     </div>
 
     <!-- MAP SIDEBAR CONTENT -->
@@ -861,6 +993,133 @@
       <div class="legend-row"><div class="legend-dot" style="background:#5aaa4a;"></div><span id="leg-good">Bra (60–79%)</span></div>
       <div class="legend-row"><div class="legend-dot" style="background:#e8a020;"></div><span id="leg-fair">Okej (40–59%)</span></div>
       <div class="legend-row"><div class="legend-dot" style="background:#c04040;"></div><span id="leg-poor">Låg (&lt;40%)</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- GUIDE PANEL -->
+<div class="guide-panel" id="guide-panel">
+  <div class="guide-header">
+    <h2 id="guide-title">🍄 Känna igen kantarellen</h2>
+    <p id="guide-subtitle">Lär dig skillnaden mellan äkta kantarell och den falska kantarellen</p>
+  </div>
+
+  <!-- Compare section -->
+  <div class="guide-section">
+    <div class="guide-section-title" id="guide-compare-lbl">Jämförelse</div>
+    <div class="mushroom-compare">
+      <div class="mushroom-card real">
+        <div class="mushroom-card-header">✅ <span id="guide-real-name">Äkta kantarell</span></div>
+        <div class="mushroom-card-body">
+          <div class="trait-row">
+            <span class="trait-icon">🎨</span>
+            <span class="trait-text"><span class="trait-label" id="g-r-color-lbl">Färg: </span><span class="trait-desc" id="g-r-color">Guldgul till äggulefärgad, jämn</span></span>
+          </div>
+          <div class="trait-row">
+            <span class="trait-icon">〰️</span>
+            <span class="trait-text"><span class="trait-label" id="g-r-gills-lbl">Skivor: </span><span class="trait-desc" id="g-r-gills">Tjocka, trubbiga, förgrenade ribbor – löper ned på skaftet</span></span>
+          </div>
+          <div class="trait-row">
+            <span class="trait-icon">🍑</span>
+            <span class="trait-text"><span class="trait-label" id="g-r-cap-lbl">Hatt: </span><span class="trait-desc" id="g-r-cap">Böjd kant, oregelbunden och vågig. Trattformad med ålder</span></span>
+          </div>
+          <div class="trait-row">
+            <span class="trait-icon">🤍</span>
+            <span class="trait-text"><span class="trait-label" id="g-r-flesh-lbl">Kött: </span><span class="trait-desc" id="g-r-flesh">Vitt och fast, mjölkvitt när det skärs</span></span>
+          </div>
+          <div class="trait-row">
+            <span class="trait-icon">👃</span>
+            <span class="trait-text"><span class="trait-label" id="g-r-smell-lbl">Doft: </span><span class="trait-desc" id="g-r-smell">Fruktig, aprikosliknande</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="mushroom-card fake">
+        <div class="mushroom-card-header">❌ <span id="guide-fake-name">Falsk kantarell</span></div>
+        <div class="mushroom-card-body">
+          <div class="trait-row">
+            <span class="trait-icon">🎨</span>
+            <span class="trait-text"><span class="trait-label" id="g-f-color-lbl">Färg: </span><span class="trait-desc" id="g-f-color">Orange till röd-orange, intensivare och ojämnare</span></span>
+          </div>
+          <div class="trait-row">
+            <span class="trait-icon">〰️</span>
+            <span class="trait-text"><span class="trait-label" id="g-f-gills-lbl">Skivor: </span><span class="trait-desc" id="g-f-gills">Tunna, täta, äkta skivor – som vanliga svampskivor</span></span>
+          </div>
+          <div class="trait-row">
+            <span class="trait-icon">🍑</span>
+            <span class="trait-text"><span class="trait-label" id="g-f-cap-lbl">Hatt: </span><span class="trait-desc" id="g-f-cap">Jämnare och rundare, mer regelbunden kant</span></span>
+          </div>
+          <div class="trait-row">
+            <span class="trait-icon">🟠</span>
+            <span class="trait-text"><span class="trait-label" id="g-f-flesh-lbl">Kött: </span><span class="trait-desc" id="g-f-flesh">Orangefärgat kött, mjukare konsistens</span></span>
+          </div>
+          <div class="trait-row">
+            <span class="trait-icon">👃</span>
+            <span class="trait-text"><span class="trait-label" id="g-f-smell-lbl">Doft: </span><span class="trait-desc" id="g-f-smell">Svag, ibland jordaktig – ingen fruktig doft</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- The gills: key difference -->
+  <div class="guide-section">
+    <div class="guide-section-title" id="guide-key-lbl">🔑 Viktigaste tecknet</div>
+    <div class="tip-box">
+      <div class="tip-box-title">〰️ <span id="guide-key-title">Titta på skivorna!</span></div>
+      <p id="guide-key-text">Den äkta kantarellens "skivor" är egentligen tjocka, trubbiga <strong>ribbor</strong> som grenar sig och löper ned längs skaftet. De är svåra att skilja från hattköttet. Den falska kantarellens skivor är <strong>tunna och täta</strong> – precis som en vanlig champinjon. Detta är den enklaste och säkraste skillnaden.</p>
+    </div>
+  </div>
+
+  <!-- Smell test -->
+  <div class="guide-section">
+    <div class="guide-section-title" id="guide-smell-lbl">👃 Luktprovet</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+      <div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;" id="guide-real-smell-lbl">Äkta kantarell</div>
+        <span class="smell-badge smell-real" id="guide-real-smell">🍑 Fruktig aprikosliknande doft</span>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;" id="guide-fake-smell-lbl">Falsk kantarell</div>
+        <span class="smell-badge smell-fake" id="guide-fake-smell">🌍 Svag, jordaktig doft</span>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--text-muted);line-height:1.5;" id="guide-smell-desc">Krama försiktigt hatten och lukta. En tydlig fruktig eller aprikosliknande doft är ett gott tecken. Ingen fruktig doft? Var försiktig.</p>
+  </div>
+
+  <!-- Safety warning -->
+  <div class="guide-section">
+    <div class="guide-section-title" id="guide-danger-lbl">⚠️ Viktigt att veta</div>
+    <div class="danger-box">
+      <div class="danger-box-title">⚠️ <span id="guide-danger-title">Falsk kantarell är giftig</span></div>
+      <p id="guide-danger-text">Den falska kantarellen (Hygrophoropsis aurantiaca) kan orsaka mag- och tarmbesvär. Symtom inkluderar illamående, kräkningar och diarré. Förväxla den aldrig med äkta kantarell. Om du är osäker – plocka inte.</p>
+    </div>
+  </div>
+
+  <!-- Pro tips -->
+  <div class="guide-section">
+    <div class="guide-section-title" id="guide-tips-lbl">💡 Nybörjartips</div>
+    <div class="tip-box">
+      <div class="tip-box-title">🌿 <span id="guide-tips-title">Kom ihåg dessa tre saker</span></div>
+      <ul class="tip-list" id="guide-tips-list">
+        <li>Ribbor, inte skivor — äkta kantarell har tjocka grenade ribbor</li>
+        <li>Fruktig doft — aprikosliknande arom är ett säkert tecken</li>
+        <li>Vitt kött — skär igenom hatten; äkta kantarell är vit inuti</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Latin names -->
+  <div class="guide-section" style="border-bottom:none;padding-bottom:20px;">
+    <div class="guide-section-title" id="guide-latin-lbl">📖 Artnamn</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
+      <div style="background:var(--cream);border-radius:8px;padding:10px;">
+        <div style="font-weight:600;color:var(--forest);margin-bottom:2px;" id="guide-real-name2">Äkta kantarell</div>
+        <div style="color:var(--text-muted);font-style:italic;">Cantharellus cibarius</div>
+      </div>
+      <div style="background:var(--cream);border-radius:8px;padding:10px;">
+        <div style="font-weight:600;color:#a02020;margin-bottom:2px;" id="guide-fake-name2">Falsk kantarell</div>
+        <div style="color:var(--text-muted);font-style:italic;">Hygrophoropsis aurantiaca</div>
+      </div>
     </div>
   </div>
 </div>
@@ -1785,23 +2044,33 @@ function renderJournal() {
 function switchTab(tab) {
   const mapPanel = document.getElementById('map-panel');
   const journalPanel = document.getElementById('journal-panel');
+  const guidePanel = document.getElementById('guide-panel');
   const tabMap = document.getElementById('tab-map');
   const tabJournal = document.getElementById('tab-journal');
+  const tabGuide = document.getElementById('tab-guide');
+
+  // Reset all
+  mapPanel.style.display = 'none';
+  journalPanel.classList.remove('visible');
+  guidePanel.classList.remove('visible');
+  tabMap.classList.remove('active');
+  tabJournal.classList.remove('active');
+  tabGuide.classList.remove('active');
 
   if (tab === 'map') {
     mapPanel.style.display = '';
-    journalPanel.classList.remove('visible');
     tabMap.classList.add('active');
-    tabJournal.classList.remove('active');
-  } else {
-    mapPanel.style.display = 'none';
+  } else if (tab === 'journal') {
     journalPanel.classList.add('visible');
-    tabMap.classList.remove('active');
     tabJournal.classList.add('active');
     // Set today's date as default
     const dateField = document.getElementById('j-date');
     if (!dateField.value) dateField.value = new Date().toISOString().slice(0,10);
     renderJournal();
+  } else if (tab === 'guide') {
+    guidePanel.classList.add('visible');
+    tabGuide.classList.add('active');
+    applyGuideTranslations();
   }
 }
 
@@ -1821,8 +2090,102 @@ applyTranslations = function() {
   document.getElementById('lbl-have-code').textContent = sv ? 'Har du redan en kod?' : 'Already have a code?';
   document.getElementById('unlock-input').placeholder = sv ? 'Ange din premiumkod...' : 'Enter your premium code...';
   document.getElementById('unlock-btn').textContent = sv ? 'Lås upp' : 'Unlock';
+  document.getElementById('tab-guide-lbl').textContent = sv ? 'Lär dig' : 'Learn';
   renderJournal();
 };
+
+function applyGuideTranslations() {
+  const sv = lang === 'sv';
+  const g = {
+    title:          sv ? '🍄 Känna igen kantarellen'                                    : '🍄 Identifying the Chanterelle',
+    subtitle:       sv ? 'Lär dig skillnaden mellan äkta kantarell och den falska kantarellen' : 'Learn the difference between the real chanterelle and the false one',
+    compareLbl:     sv ? 'Jämförelse'                                                   : 'Comparison',
+    realName:       sv ? 'Äkta kantarell'                                               : 'Real chanterelle',
+    fakeName:       sv ? 'Falsk kantarell'                                              : 'False chanterelle',
+    colorLbl:       sv ? 'Färg: '                                                       : 'Colour: ',
+    rColor:         sv ? 'Guldgul till äggulefärgad, jämn'                              : 'Golden yellow to egg-yolk, even tone',
+    fColor:         sv ? 'Orange till röd-orange, intensivare och ojämnare'             : 'Orange to red-orange, more intense and uneven',
+    gillsLbl:       sv ? 'Skivor: '                                                     : 'Gills: ',
+    rGills:         sv ? 'Tjocka, trubbiga, förgrenade ribbor – löper ned på skaftet'  : 'Thick, blunt, forked ridges – run down the stem',
+    fGills:         sv ? 'Tunna, täta, äkta skivor – som vanliga svampskivor'          : 'Thin, crowded, true gills – like a regular mushroom',
+    capLbl:         sv ? 'Hatt: '                                                       : 'Cap: ',
+    rCap:           sv ? 'Böjd kant, oregelbunden och vågig. Trattformad med ålder'    : 'Wavy and irregular margin. Funnel-shaped with age',
+    fCap:           sv ? 'Jämnare och rundare, mer regelbunden kant'                    : 'Smoother and rounder, more regular margin',
+    fleshLbl:       sv ? 'Kött: '                                                       : 'Flesh: ',
+    rFlesh:         sv ? 'Vitt och fast, mjölkvitt när det skärs'                      : 'White and firm, milky white when cut',
+    fFlesh:         sv ? 'Orangefärgat kött, mjukare konsistens'                       : 'Orange-coloured flesh, softer texture',
+    smellLbl:       sv ? 'Doft: '                                                       : 'Smell: ',
+    rSmell:         sv ? 'Fruktig, aprikosliknande'                                    : 'Fruity, apricot-like',
+    fSmell:         sv ? 'Svag, ibland jordaktig – ingen fruktig doft'                 : 'Faint, sometimes earthy – no fruity scent',
+    keyLbl:         sv ? '🔑 Viktigaste tecknet'                                        : '🔑 Key difference',
+    keyTitle:       sv ? 'Titta på skivorna!'                                           : 'Look at the gills!',
+    keyText:        sv ? 'Den äkta kantarellens "skivor" är egentligen tjocka, trubbiga <strong>ribbor</strong> som grenar sig och löper ned längs skaftet. De är svåra att skilja från hattköttet. Den falska kantarellens skivor är <strong>tunna och täta</strong> – precis som en vanlig champinjon. Detta är den enklaste och säkraste skillnaden.' : 'The real chanterelle's "gills" are actually thick, blunt <strong>ridges</strong> that fork and run down the stem. They are hard to separate from the cap flesh. The false chanterelle has <strong>thin, crowded</strong> true gills – just like a regular mushroom. This is the easiest and most reliable difference.',
+    smellSectionLbl:sv ? '👃 Luktprovet'                                                : '👃 The smell test',
+    realSmellLbl:   sv ? 'Äkta kantarell'                                               : 'Real chanterelle',
+    fakeSmellLbl:   sv ? 'Falsk kantarell'                                              : 'False chanterelle',
+    realSmellBadge: sv ? '🍑 Fruktig aprikosliknande doft'                             : '🍑 Fruity apricot-like scent',
+    fakeSmellBadge: sv ? '🌍 Svag, jordaktig doft'                                     : '🌍 Faint, earthy smell',
+    smellDesc:      sv ? 'Krama försiktigt hatten och lukta. En tydlig fruktig eller aprikosliknande doft är ett gott tecken. Ingen fruktig doft? Var försiktig.' : 'Gently squeeze the cap and smell. A clear fruity or apricot-like scent is a good sign. No fruity scent? Be cautious.',
+    dangerLbl:      sv ? '⚠️ Viktigt att veta'                                          : '⚠️ Important to know',
+    dangerTitle:    sv ? 'Falsk kantarell är giftig'                                    : 'False chanterelle is poisonous',
+    dangerText:     sv ? 'Den falska kantarellen (Hygrophoropsis aurantiaca) kan orsaka mag- och tarmbesvär. Symtom inkluderar illamående, kräkningar och diarré. Förväxla den aldrig med äkta kantarell. Om du är osäker – plocka inte.' : 'The false chanterelle (Hygrophoropsis aurantiaca) can cause gastrointestinal distress. Symptoms include nausea, vomiting and diarrhoea. Never confuse it with the real chanterelle. If in doubt – leave it out.',
+    tipsLbl:        sv ? '💡 Nybörjartips'                                              : '💡 Beginner tips',
+    tipsTitle:      sv ? 'Kom ihåg dessa tre saker'                                     : 'Remember these three things',
+    tip1:           sv ? 'Ribbor, inte skivor — äkta kantarell har tjocka grenade ribbor'  : 'Ridges, not gills — real chanterelle has thick forked ridges',
+    tip2:           sv ? 'Fruktig doft — aprikosliknande arom är ett säkert tecken'        : 'Fruity scent — apricot-like aroma is a reliable sign',
+    tip3:           sv ? 'Vitt kött — skär igenom hatten; äkta kantarell är vit inuti'     : 'White flesh — cut through the cap; real chanterelle is white inside',
+    latinLbl:       sv ? '📖 Artnamn'                                                   : '📖 Species names',
+    realName2:      sv ? 'Äkta kantarell'                                               : 'Real chanterelle',
+    fakeName2:      sv ? 'Falsk kantarell'                                              : 'False chanterelle',
+  };
+
+  document.getElementById('guide-title').textContent = g.title;
+  document.getElementById('guide-subtitle').textContent = g.subtitle;
+  document.getElementById('guide-compare-lbl').textContent = g.compareLbl;
+  document.getElementById('guide-real-name').textContent = g.realName;
+  document.getElementById('guide-fake-name').textContent = g.fakeName;
+  document.getElementById('g-r-color-lbl').textContent = g.colorLbl;
+  document.getElementById('g-r-color').textContent = g.rColor;
+  document.getElementById('g-f-color-lbl').textContent = g.colorLbl;
+  document.getElementById('g-f-color').textContent = g.fColor;
+  document.getElementById('g-r-gills-lbl').textContent = g.gillsLbl;
+  document.getElementById('g-r-gills').textContent = g.rGills;
+  document.getElementById('g-f-gills-lbl').textContent = g.gillsLbl;
+  document.getElementById('g-f-gills').textContent = g.fGills;
+  document.getElementById('g-r-cap-lbl').textContent = g.capLbl;
+  document.getElementById('g-r-cap').textContent = g.rCap;
+  document.getElementById('g-f-cap-lbl').textContent = g.capLbl;
+  document.getElementById('g-f-cap').textContent = g.fCap;
+  document.getElementById('g-r-flesh-lbl').textContent = g.fleshLbl;
+  document.getElementById('g-r-flesh').textContent = g.rFlesh;
+  document.getElementById('g-f-flesh-lbl').textContent = g.fleshLbl;
+  document.getElementById('g-f-flesh').textContent = g.fFlesh;
+  document.getElementById('g-r-smell-lbl').textContent = g.smellLbl;
+  document.getElementById('g-r-smell').textContent = g.rSmell;
+  document.getElementById('g-f-smell-lbl').textContent = g.smellLbl;
+  document.getElementById('g-f-smell').textContent = g.fSmell;
+  document.getElementById('guide-key-lbl').textContent = g.keyLbl;
+  document.getElementById('guide-key-title').textContent = g.keyTitle;
+  document.getElementById('guide-key-text').innerHTML = g.keyText;
+  document.getElementById('guide-smell-lbl').textContent = g.smellSectionLbl;
+  document.getElementById('guide-real-smell-lbl').textContent = g.realSmellLbl;
+  document.getElementById('guide-fake-smell-lbl').textContent = g.fakeSmellLbl;
+  document.getElementById('guide-real-smell').textContent = g.realSmellBadge;
+  document.getElementById('guide-fake-smell').textContent = g.fakeSmellBadge;
+  document.getElementById('guide-smell-desc').textContent = g.smellDesc;
+  document.getElementById('guide-danger-lbl').textContent = g.dangerLbl;
+  document.getElementById('guide-danger-title').textContent = g.dangerTitle;
+  document.getElementById('guide-danger-text').textContent = g.dangerText;
+  document.getElementById('guide-tips-lbl').textContent = g.tipsLbl;
+  document.getElementById('guide-tips-title').textContent = g.tipsTitle;
+  const tipsList = document.getElementById('guide-tips-list');
+  tipsList.innerHTML = [g.tip1, g.tip2, g.tip3].map(t => `<li>${t}</li>`).join('');
+  document.getElementById('guide-latin-lbl').textContent = g.latinLbl;
+  document.getElementById('guide-real-name2').textContent = g.realName2;
+  document.getElementById('guide-fake-name2').textContent = g.fakeName2;
+}
+
+
 
 </script>
 </body>
