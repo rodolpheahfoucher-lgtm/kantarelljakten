@@ -850,6 +850,105 @@
     border-top: 1px solid var(--mist);
     margin-top: 4px;
   }
+
+  /* ── LOCAL SPOT MAP ──────────────────────────────────────────── */
+  .local-map-drawer {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 2000;
+    background: white;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -4px 30px rgba(0,0,0,0.22);
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .local-map-drawer.open { transform: translateY(0); }
+
+  .drawer-handle {
+    width: 40px; height: 4px;
+    background: var(--mist);
+    border-radius: 2px;
+    margin: 10px auto 0;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .drawer-header {
+    background: var(--forest);
+    color: var(--gold-pale);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .drawer-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; }
+  .drawer-coords { font-size: 11px; opacity: 0.6; font-family: monospace; margin-top: 2px; }
+  .drawer-close {
+    background: none; border: none; color: var(--gold-pale);
+    font-size: 20px; cursor: pointer; line-height: 1; padding: 4px;
+  }
+
+  .drawer-actions {
+    display: flex; gap: 8px; padding: 10px 14px;
+    background: var(--cream); flex-shrink: 0;
+    border-bottom: 1px solid var(--mist);
+    flex-wrap: wrap;
+  }
+  .map-open-btn {
+    display: flex; align-items: center; gap: 5px;
+    padding: 7px 14px; border-radius: 20px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; text-decoration: none;
+    border: 1.5px solid var(--mist);
+    background: white; color: var(--text);
+    transition: all 0.15s;
+  }
+  .map-open-btn.primary {
+    background: var(--forest); color: var(--gold-pale);
+    border-color: var(--forest);
+  }
+  .map-open-btn:hover { filter: brightness(1.08); }
+
+  .drawer-layer-row {
+    display: flex; gap: 6px; padding: 8px 14px;
+    background: white; flex-shrink: 0;
+    border-bottom: 1px solid var(--mist);
+  }
+  .layer-pill-btn {
+    font-size: 11px; font-weight: 500;
+    padding: 4px 12px; border-radius: 12px;
+    border: 1px solid var(--mist);
+    background: var(--cream); color: var(--text-muted);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .layer-pill-btn.active {
+    background: var(--forest); color: var(--gold-pale);
+    border-color: var(--forest);
+  }
+
+  #localMap { flex: 1; min-height: 260px; }
+
+  .drawer-rain-strip {
+    display: flex; gap: 16px; padding: 10px 16px;
+    background: #eef7e6; border-top: 1px solid #cde0b8;
+    flex-shrink: 0; flex-wrap: wrap;
+  }
+  .rain-stat-item { font-size: 12px; color: var(--text-muted); }
+  .rain-stat-item strong { display: block; font-size: 15px; color: var(--forest); }
+
+  /* Explore button inside Leaflet popups */
+  .explore-btn {
+    display: inline-block; margin-top: 8px;
+    background: var(--forest, #2d4a1e); color: #f5e4b0;
+    border: none; border-radius: 14px;
+    padding: 5px 14px; font-size: 12px; font-weight: 500;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+    width: 100%;
+  }
 </style>
 </head>
 <body>
@@ -1187,6 +1286,35 @@
   </div>
 </div>
 
+<!-- LOCAL SPOT MAP DRAWER -->
+<div class="local-map-drawer" id="localMapDrawer">
+  <div class="drawer-handle" onclick="closeLocalMap()"></div>
+  <div class="drawer-header">
+    <div>
+      <div class="drawer-title" id="drawerTitle">Utforska platsen</div>
+      <div class="drawer-coords" id="drawerCoords"></div>
+    </div>
+    <button class="drawer-close" onclick="closeLocalMap()">✕</button>
+  </div>
+  <div class="drawer-actions">
+    <a class="map-open-btn primary" id="btnGoogle" href="#" target="_blank">📍 Google Maps</a>
+    <a class="map-open-btn" id="btnApple" href="#" target="_blank">🗺 Apple Maps</a>
+    <a class="map-open-btn" id="btnLantmateriet" href="#" target="_blank">🌲 Terrängkarta</a>
+  </div>
+  <div class="drawer-layer-row">
+    <button class="layer-pill-btn active" onclick="setLocalLayer('topo',this)">Terrängkarta</button>
+    <button class="layer-pill-btn" onclick="setLocalLayer('satellite',this)">Satellit</button>
+    <button class="layer-pill-btn" onclick="setLocalLayer('osm',this)">Karta</button>
+  </div>
+  <div id="localMap"></div>
+  <div class="drawer-rain-strip" id="drawerRainStrip">
+    <div class="rain-stat-item"><strong id="ds-rain">—</strong>7-dagarsregn</div>
+    <div class="rain-stat-item"><strong id="ds-temp">—</strong>Temperatur</div>
+    <div class="rain-stat-item"><strong id="ds-humid">—</strong>Luftfuktighet</div>
+    <div class="rain-stat-item"><strong id="ds-score">—</strong>Kantarellchans</div>
+  </div>
+</div>
+
 <script>
 // ── TRANSLATIONS ────────────────────────────────────────────────
 const T = {
@@ -1452,8 +1580,8 @@ async function fetchGridScores(points) {
     const batch = points.slice(i, i + BATCH);
     const settled = await Promise.allSettled(batch.map(async p => {
       const data = await fetchWeather(p.lat, p.lng);
-      const { score, cloudcover } = calcScore(data);
-      return { lat: p.lat, lng: p.lng, score, cloudcover };
+      const { score, cloudcover, total7, avgTemp, humidity } = calcScore(data);
+      return { lat: p.lat, lng: p.lng, score, cloudcover, total7, avgTemp, humidity };
     }));
     settled.forEach((r, idx) => {
       if (r.status === 'fulfilled') results.push(r.value);
@@ -1469,7 +1597,7 @@ function renderGridMarkers(gridResults, userLat, userLng) {
   markers = [];
 
   // Draw heatmap circles (large, semi-transparent)
-  gridResults.forEach(({ lat, lng, score, cloudcover }) => {
+  gridResults.forEach(({ lat, lng, score, cloudcover, total7, avgTemp, humidity }) => {
     const circle = L.circle([lat, lng], {
       radius: 12000,           // ~12km radius per point
       color: 'transparent',
@@ -1482,10 +1610,13 @@ function renderGridMarkers(gridResults, userLat, userLng) {
     const cloudIcon = cloudcover !== null
       ? (cloudcover >= 70 ? '☁️' : cloudcover >= 40 ? '⛅' : '☀️') : '';
     const emoji = score >= 80 ? '🍄🍄🍄' : score >= 60 ? '🍄🍄' : score >= 40 ? '🍄' : '🌵';
+    const exploreLbl = sv ? 'Utforska denna plats →' : 'Explore this spot →';
     circle.bindPopup(
       `<b>${emoji} ${score}%</b><br>` +
       (sv ? 'Kantarellsannolikhet' : 'Chanterelle likelihood') +
-      (cloudcover !== null ? `<br>${cloudIcon} ${cloudcover}% ` + (sv ? 'molntäcke' : 'cloud cover') : '')
+      (cloudcover !== null ? `<br>${cloudIcon} ${cloudcover}% ` + (sv ? 'molntäcke' : 'cloud cover') : '') +
+      `<br><button class="explore-btn" onclick="openLocalMap(${lat},${lng},${score},${total7??'undefined'},${avgTemp??'undefined'},${humidity??'undefined'})">` +
+      `${exploreLbl}</button>`
     );
     markers.push(circle);
   });
@@ -1590,8 +1721,13 @@ function addRegionMarkers(scores) {
       iconAnchor: [23, 23],
     });
     const cloudText = cloudcover !== null ? `<br>☁️ ${cloudcover}% molntäcke` : '';
+    const exploreLbl = lang === 'sv' ? 'Utforska denna plats →' : 'Explore this spot →';
     const marker = L.marker([reg.lat, reg.lng], { icon }).addTo(map);
-    marker.bindPopup(`<b>${region}</b><br>🍄 ${score}% sannolikhet${cloudText}`);
+    marker.bindPopup(
+      `<b>${region}</b><br>🍄 ${score}% sannolikhet${cloudText}` +
+      `<br><button class="explore-btn" onclick="openLocalMap(${reg.lat},${reg.lng},${score})">` +
+      `${exploreLbl}</button>`
+    );
     marker.on('click', () => {
       selectedRegion = region;
       renderChips();
@@ -1800,6 +1936,73 @@ applyTranslations();
 renderChips();
 loadRegion('Dalarna');
 applyPremiumState(); // restore premium if already unlocked
+
+// ── LOCAL SPOT MAP ──────────────────────────────────────────────
+let localMap = null, localMapLayer = null, localMapMarker = null;
+
+function openLocalMap(lat, lng, score, rain7d, temp, humid) {
+  const drawer = document.getElementById('localMapDrawer');
+  drawer.classList.add('open');
+
+  // Header
+  const sv = lang === 'sv';
+  document.getElementById('drawerTitle').textContent = sv ? 'Utforska platsen 🍄' : 'Explore this spot 🍄';
+  document.getElementById('drawerCoords').textContent = `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
+
+  // Stats strip
+  document.getElementById('ds-rain').textContent  = rain7d !== undefined ? rain7d.toFixed(1) + ' mm' : '—';
+  document.getElementById('ds-temp').textContent  = temp   !== undefined ? temp.toFixed(1)  + ' °C' : '—';
+  document.getElementById('ds-humid').textContent = humid  !== undefined ? humid + ' %'              : '—';
+  document.getElementById('ds-score').textContent = score  !== undefined ? score + ' %'              : '—';
+
+  // Deep links — open native map apps on phone
+  document.getElementById('btnGoogle').href =
+    `https://www.google.com/maps?q=${lat},${lng}&z=14`;
+  document.getElementById('btnApple').href =
+    `https://maps.apple.com/?ll=${lat},${lng}&z=14`;
+  document.getElementById('btnLantmateriet').href =
+    `https://karta.lantmateriet.se/#rit=topowebb&zoom=14&north=${lat}&east=${lng}`;
+
+  // Init Leaflet local map (lazy — only once)
+  if (!localMap) {
+    localMap = L.map('localMap').setView([lat, lng], 13);
+    setLocalLayer('topo', document.querySelector('.layer-pill-btn.active'));
+  } else {
+    localMap.setView([lat, lng], 13);
+    if (localMapMarker) localMap.removeLayer(localMapMarker);
+  }
+
+  // Drop a marker
+  const scoreCol = score >= 80 ? '#2a7a3a' : score >= 60 ? '#5aaa4a' : score >= 40 ? '#e8a020' : '#c04040';
+  const icon = L.divIcon({
+    className: '',
+    html: `<div style="background:${scoreCol};color:white;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);">${score || '?'}%</div>`,
+    iconSize: [36,36], iconAnchor: [18,18]
+  });
+  localMapMarker = L.marker([lat, lng], { icon }).addTo(localMap);
+  localMapMarker.bindPopup(`🍄 ${score || '?'}% ${sv ? 'kantarellchans' : 'chanterelle likelihood'}`).openPopup();
+
+  // Force Leaflet to recalculate size after drawer opens
+  setTimeout(() => localMap.invalidateSize(), 350);
+}
+
+function closeLocalMap() {
+  document.getElementById('localMapDrawer').classList.remove('open');
+}
+
+function setLocalLayer(type, btn) {
+  if (!localMap) return;
+  if (localMapLayer) localMap.removeLayer(localMapLayer);
+  const urls = {
+    topo:      'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    osm:       'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  };
+  const attribs = { topo: '© OpenTopoMap', satellite: '© Esri', osm: '© OpenStreetMap' };
+  localMapLayer = L.tileLayer(urls[type], { maxZoom: 17, attribution: attribs[type] }).addTo(localMap);
+  document.querySelectorAll('.layer-pill-btn').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
 
 // ── SERVICE WORKER ──────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
