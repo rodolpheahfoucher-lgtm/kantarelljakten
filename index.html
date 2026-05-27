@@ -2033,16 +2033,20 @@ const TRIAL_DAYS   = 7;
 
 /* ── TRIAL HELPERS ───────────────────────────────────────────── */
 function getTrialStart() {
+  // VERSION 2 — reset key forces all existing users onto a fresh trial
+  const RESET_KEY = 'kantarell_trial_v2';
+  if (!localStorage.getItem(RESET_KEY)) {
+    // First visit with this version — wipe old trial data and start fresh
+    localStorage.removeItem(TRIAL_KEY);
+    if (localStorage.getItem(PREMIUM_KEY) !== 'true') {
+      localStorage.removeItem(PREMIUM_KEY);
+    }
+    localStorage.setItem(RESET_KEY, '1');
+  }
   let ts = localStorage.getItem(TRIAL_KEY);
-  // Feature launched ~May 2026. Any stored date before that is stale — reset it.
-  const LAUNCH_DATE = 1746057600000; // 2026-05-01 UTC
-  if (!ts || parseInt(ts, 10) < LAUNCH_DATE) {
+  if (!ts) {
     ts = Date.now().toString();
     localStorage.setItem(TRIAL_KEY, ts);
-    // Also clear any accidental premium lock from old code
-    if (localStorage.getItem('kantarell_premium_v1') !== 'true') {
-      localStorage.removeItem('kantarell_premium_v1');
-    }
   }
   return parseInt(ts, 10);
 }
