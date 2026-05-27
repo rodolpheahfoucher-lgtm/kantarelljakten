@@ -1991,6 +1991,10 @@ function setLocalLayer(type, btn) {
 
 // ── SERVICE WORKER ──────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
+  // Unregister old service workers to force fresh content
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(reg => reg.unregister());
+  });
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then(reg => console.log('SW registered:', reg.scope))
@@ -2032,41 +2036,11 @@ const TRIAL_KEY    = 'kantarell_trial_start_v1';
 const TRIAL_DAYS   = 7;
 
 /* ── TRIAL HELPERS ───────────────────────────────────────────── */
-function getTrialStart() {
-  // VERSION 2 — reset key forces all existing users onto a fresh trial
-  const RESET_KEY = 'kantarell_trial_v2';
-  if (!localStorage.getItem(RESET_KEY)) {
-    // First visit with this version — wipe old trial data and start fresh
-    localStorage.removeItem(TRIAL_KEY);
-    if (localStorage.getItem(PREMIUM_KEY) !== 'true') {
-      localStorage.removeItem(PREMIUM_KEY);
-    }
-    localStorage.setItem(RESET_KEY, '1');
-  }
-  let ts = localStorage.getItem(TRIAL_KEY);
-  if (!ts) {
-    ts = Date.now().toString();
-    localStorage.setItem(TRIAL_KEY, ts);
-  }
-  return parseInt(ts, 10);
-}
-
-function daysRemaining() {
-  const elapsed = (Date.now() - getTrialStart()) / (1000 * 60 * 60 * 24);
-  return Math.max(0, Math.ceil(TRIAL_DAYS - elapsed));
-}
-
-function trialActive() {
-  return daysRemaining() > 0;
-}
-
-function isPremium() {
-  return localStorage.getItem(PREMIUM_KEY) === 'true';
-}
-
-function hasAccess() {
-  return isPremium() || trialActive();
-}
+function getTrialStart() { return Date.now(); }
+function daysRemaining() { return 7; }
+function trialActive() { return true; }
+function isPremium() { return localStorage.getItem(PREMIUM_KEY) === 'true'; }
+function hasAccess() { return true; }
 
 /* ── BANNER STATE ────────────────────────────────────────────── */
 function updateTrialBanner() {
