@@ -8,22 +8,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Kantarelljakten</title>
 
-<!-- Open Graph / Social Media Sharing -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://kantarelljakten.se">
-<meta property="og:title" content="Kantarelljakten 🍄 — Din guide till kantarelljakten">
-<meta property="og:description" content="Hitta kantareller var som helst i Sverige! Dagliga väderanalyser, sannolikhetskarta och tips för nybörjare. Prova gratis i 7 dagar.">
-<meta property="og:image" content="https://raw.githubusercontent.com/rodolpheahfoucher-lgtm/kantarelljakten/main/Kanterell-1.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:locale" content="sv_SE">
-
-<!-- Twitter / X Card -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Kantarelljakten 🍄 — Din guide till kantarelljakten">
-<meta name="twitter:description" content="Hitta kantareller var som helst i Sverige! Dagliga väderanalyser, sannolikhetskarta och tips för nybörjare. Prova gratis i 7 dagar.">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/rodolpheahfoucher-lgtm/kantarelljakten/main/Kanterell-1.jpg">
-
 <!-- PWA Manifest -->
 <link rel="manifest" href="/manifest.json">
 
@@ -153,7 +137,7 @@
   }
   .subscribe-btn:hover { background: var(--gold-light); }
 
-  /* INSTALL BUTTON */
+  /* INSTALL BUTTON (header) */
   .install-btn {
     background: rgba(255,255,255,0.15);
     color: var(--gold-pale);
@@ -192,7 +176,6 @@
     max-width: 400px;
     width: 100%;
     text-align: center;
-    position: relative;
   }
   .ios-install-box h3 {
     font-family: 'Playfair Display', serif;
@@ -200,42 +183,17 @@
     font-size: 20px;
     margin-bottom: 8px;
   }
-  .ios-install-box p {
+  .ios-install-box > p {
     color: var(--text-muted);
     font-size: 14px;
     margin-bottom: 24px;
     line-height: 1.5;
   }
-  .ios-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    text-align: left;
-    margin-bottom: 24px;
-  }
-  .ios-step {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    background: var(--mist);
-    border-radius: 12px;
-    padding: 14px 16px;
-  }
-  .ios-step-icon {
-    font-size: 28px;
-    flex-shrink: 0;
-  }
-  .ios-step-text {
-    font-size: 14px;
-    color: var(--text);
-    line-height: 1.4;
-  }
-  .ios-step-text strong {
-    display: block;
-    color: var(--forest);
-    font-weight: 600;
-    margin-bottom: 2px;
-  }
+  .ios-steps { display: flex; flex-direction: column; gap: 16px; text-align: left; margin-bottom: 24px; }
+  .ios-step { display: flex; align-items: center; gap: 16px; background: var(--mist); border-radius: 12px; padding: 14px 16px; }
+  .ios-step-icon { font-size: 28px; flex-shrink: 0; }
+  .ios-step-text { font-size: 14px; color: var(--text); line-height: 1.4; }
+  .ios-step-text strong { display: block; color: var(--forest); font-weight: 600; margin-bottom: 2px; }
   .ios-close-btn {
     background: var(--forest);
     color: var(--gold-pale);
@@ -247,18 +205,10 @@
     font-weight: 500;
     cursor: pointer;
     width: 100%;
+    margin-bottom: 10px;
   }
-  /* Arrow pointing down for iPhone bottom bar */
-  .ios-arrow {
-    text-align: center;
-    font-size: 28px;
-    margin-top: 8px;
-    animation: bounce 1.5s infinite;
-  }
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(6px); }
-  }
+  .ios-arrow { text-align: center; font-size: 28px; animation: bounce 1.5s infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
 
   /* PREMIUM BANNER */
   .premium-banner {
@@ -727,137 +677,6 @@
   }
   .journal-panel.visible { display: flex; }
 
-  /* GUIDE PANEL */
-  .guide-panel {
-    display: none;
-    flex-direction: column;
-    height: 100%;
-    overflow-y: auto;
-    background: white;
-  }
-  .guide-panel.visible { display: flex; }
-  .guide-header {
-    padding: 16px;
-    background: var(--forest);
-    color: var(--gold-pale);
-    text-align: center;
-  }
-  .guide-header h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--gold-light);
-    margin-bottom: 4px;
-  }
-  .guide-header p {
-    font-size: 12px;
-    color: rgba(245,228,176,0.7);
-    line-height: 1.4;
-  }
-  .guide-section {
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--mist);
-  }
-  .guide-section-title {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    font-weight: 500;
-    margin-bottom: 12px;
-  }
-  .mushroom-compare {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 2px;
-  }
-  .mushroom-card {
-    border-radius: 12px;
-    overflow: hidden;
-    border: 2px solid transparent;
-  }
-  .mushroom-card.real { border-color: #4a9e6b; }
-  .mushroom-card.fake { border-color: #c04040; }
-  .mushroom-card-header {
-    padding: 8px 10px;
-    font-weight: 700;
-    font-size: 12px;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-  }
-  .mushroom-card.real .mushroom-card-header { background: #e8f5ee; color: #2a6040; }
-  .mushroom-card.fake .mushroom-card-header { background: #fde8e8; color: #a02020; }
-  .mushroom-card-body {
-    padding: 10px;
-    background: var(--cream);
-    font-size: 12px;
-    line-height: 1.5;
-    color: var(--text);
-  }
-  .trait-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-    align-items: flex-start;
-  }
-  .trait-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
-  .trait-text { font-size: 12px; line-height: 1.4; }
-  .trait-label { font-weight: 600; color: var(--text); }
-  .trait-desc { color: var(--text-muted); }
-  .danger-box {
-    background: #fde8e8;
-    border: 1.5px solid #e08080;
-    border-radius: 10px;
-    padding: 12px 14px;
-    margin-top: 4px;
-  }
-  .danger-box-title {
-    font-weight: 700;
-    font-size: 13px;
-    color: #a02020;
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .danger-box p { font-size: 12px; color: #6a2020; line-height: 1.5; }
-  .tip-box {
-    background: #e8f5ee;
-    border: 1.5px solid #70c090;
-    border-radius: 10px;
-    padding: 12px 14px;
-    margin-top: 4px;
-  }
-  .tip-box-title {
-    font-weight: 700;
-    font-size: 13px;
-    color: #2a6040;
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .tip-box p { font-size: 12px; color: #1a4030; line-height: 1.5; }
-  .tip-list { font-size: 12px; color: #1a4030; line-height: 1.6; padding-left: 4px; }
-  .tip-list li { margin-bottom: 2px; list-style: none; padding-left: 4px; }
-  .tip-list li::before { content: "✓ "; color: #4a9e6b; font-weight: 700; }
-  .smell-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    margin-right: 4px;
-    margin-top: 4px;
-  }
-  .smell-real { background: #e8f5ee; color: #2a6040; border: 1px solid #70c090; }
-  .smell-fake { background: #fff5e0; color: #7a5000; border: 1px solid #e0a840; }
-
-
   .journal-add {
     padding: 14px 16px;
     border-bottom: 1px solid var(--mist);
@@ -957,105 +776,6 @@
     border-top: 1px solid var(--mist);
     margin-top: 4px;
   }
-
-  /* ── LOCAL SPOT MAP ──────────────────────────────────────────── */
-  .local-map-drawer {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    z-index: 2000;
-    background: white;
-    border-radius: 18px 18px 0 0;
-    box-shadow: 0 -4px 30px rgba(0,0,0,0.22);
-    transform: translateY(100%);
-    transition: transform 0.35s cubic-bezier(.4,0,.2,1);
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-  }
-  .local-map-drawer.open { transform: translateY(0); }
-
-  .drawer-handle {
-    width: 40px; height: 4px;
-    background: var(--mist);
-    border-radius: 2px;
-    margin: 10px auto 0;
-    flex-shrink: 0;
-    cursor: pointer;
-  }
-
-  .drawer-header {
-    background: var(--forest);
-    color: var(--gold-pale);
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
-  .drawer-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; }
-  .drawer-coords { font-size: 11px; opacity: 0.6; font-family: monospace; margin-top: 2px; }
-  .drawer-close {
-    background: none; border: none; color: var(--gold-pale);
-    font-size: 20px; cursor: pointer; line-height: 1; padding: 4px;
-  }
-
-  .drawer-actions {
-    display: flex; gap: 8px; padding: 10px 14px;
-    background: var(--cream); flex-shrink: 0;
-    border-bottom: 1px solid var(--mist);
-    flex-wrap: wrap;
-  }
-  .map-open-btn {
-    display: flex; align-items: center; gap: 5px;
-    padding: 7px 14px; border-radius: 20px;
-    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
-    cursor: pointer; text-decoration: none;
-    border: 1.5px solid var(--mist);
-    background: white; color: var(--text);
-    transition: all 0.15s;
-  }
-  .map-open-btn.primary {
-    background: var(--forest); color: var(--gold-pale);
-    border-color: var(--forest);
-  }
-  .map-open-btn:hover { filter: brightness(1.08); }
-
-  .drawer-layer-row {
-    display: flex; gap: 6px; padding: 8px 14px;
-    background: white; flex-shrink: 0;
-    border-bottom: 1px solid var(--mist);
-  }
-  .layer-pill-btn {
-    font-size: 11px; font-weight: 500;
-    padding: 4px 12px; border-radius: 12px;
-    border: 1px solid var(--mist);
-    background: var(--cream); color: var(--text-muted);
-    cursor: pointer; transition: all 0.15s;
-  }
-  .layer-pill-btn.active {
-    background: var(--forest); color: var(--gold-pale);
-    border-color: var(--forest);
-  }
-
-  #localMap { flex: 1; min-height: 260px; }
-
-  .drawer-rain-strip {
-    display: flex; gap: 16px; padding: 10px 16px;
-    background: #eef7e6; border-top: 1px solid #cde0b8;
-    flex-shrink: 0; flex-wrap: wrap;
-  }
-  .rain-stat-item { font-size: 12px; color: var(--text-muted); }
-  .rain-stat-item strong { display: block; font-size: 15px; color: var(--forest); }
-
-  /* Explore button inside Leaflet popups */
-  .explore-btn {
-    display: inline-block; margin-top: 8px;
-    background: var(--forest, #2d4a1e); color: #f5e4b0;
-    border: none; border-radius: 14px;
-    padding: 5px 14px; font-size: 12px; font-weight: 500;
-    cursor: pointer; font-family: 'DM Sans', sans-serif;
-    width: 100%;
-  }
 </style>
 </head>
 <body>
@@ -1083,7 +803,7 @@
 <div class="premium-banner">
   <div style="display:flex;align-items:center;">
     <span class="premium-badge">Free</span>
-    <span class="premium-text" id="banner-text">🍄 7 dagar gratis — hela Sverige upplåst!</span>
+    <span class="premium-text" id="banner-text">🍄 30 dagar gratis provperiod — hela Sverige upplåst!</span>
   </div>
   <span class="premium-cta" onclick="openModal()" id="banner-cta">Uppgradera →</span>
 </div>
@@ -1095,7 +815,6 @@
     <div class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('map')" id="tab-map">🗺 <span id="tab-map-lbl">Karta</span></button>
       <button class="tab-btn" onclick="switchTab('journal')" id="tab-journal">📓 <span id="tab-journal-lbl">Min Journal</span></button>
-      <button class="tab-btn" onclick="switchTab('guide')" id="tab-guide">🍄 <span id="tab-guide-lbl">Lär dig</span></button>
     </div>
 
     <!-- MAP SIDEBAR CONTENT -->
@@ -1220,133 +939,6 @@
   </div>
 </div>
 
-<!-- GUIDE PANEL -->
-<div class="guide-panel" id="guide-panel">
-  <div class="guide-header">
-    <h2 id="guide-title">🍄 Känna igen kantarellen</h2>
-    <p id="guide-subtitle">Lär dig skillnaden mellan äkta kantarell och den falska kantarellen</p>
-  </div>
-
-  <!-- Compare section -->
-  <div class="guide-section">
-    <div class="guide-section-title" id="guide-compare-lbl">Jämförelse</div>
-    <div class="mushroom-compare">
-      <div class="mushroom-card real">
-        <div class="mushroom-card-header">✅ <span id="guide-real-name">Äkta kantarell</span></div>
-        <div class="mushroom-card-body">
-          <div class="trait-row">
-            <span class="trait-icon">🎨</span>
-            <span class="trait-text"><span class="trait-label" id="g-r-color-lbl">Färg: </span><span class="trait-desc" id="g-r-color">Guldgul till äggulefärgad, jämn</span></span>
-          </div>
-          <div class="trait-row">
-            <span class="trait-icon">〰️</span>
-            <span class="trait-text"><span class="trait-label" id="g-r-gills-lbl">Skivor: </span><span class="trait-desc" id="g-r-gills">Tjocka, trubbiga, förgrenade ribbor – löper ned på skaftet</span></span>
-          </div>
-          <div class="trait-row">
-            <span class="trait-icon">🍑</span>
-            <span class="trait-text"><span class="trait-label" id="g-r-cap-lbl">Hatt: </span><span class="trait-desc" id="g-r-cap">Böjd kant, oregelbunden och vågig. Trattformad med ålder</span></span>
-          </div>
-          <div class="trait-row">
-            <span class="trait-icon">🤍</span>
-            <span class="trait-text"><span class="trait-label" id="g-r-flesh-lbl">Kött: </span><span class="trait-desc" id="g-r-flesh">Vitt och fast, mjölkvitt när det skärs</span></span>
-          </div>
-          <div class="trait-row">
-            <span class="trait-icon">👃</span>
-            <span class="trait-text"><span class="trait-label" id="g-r-smell-lbl">Doft: </span><span class="trait-desc" id="g-r-smell">Fruktig, aprikosliknande</span></span>
-          </div>
-        </div>
-      </div>
-      <div class="mushroom-card fake">
-        <div class="mushroom-card-header">❌ <span id="guide-fake-name">Falsk kantarell</span></div>
-        <div class="mushroom-card-body">
-          <div class="trait-row">
-            <span class="trait-icon">🎨</span>
-            <span class="trait-text"><span class="trait-label" id="g-f-color-lbl">Färg: </span><span class="trait-desc" id="g-f-color">Orange till röd-orange, intensivare och ojämnare</span></span>
-          </div>
-          <div class="trait-row">
-            <span class="trait-icon">〰️</span>
-            <span class="trait-text"><span class="trait-label" id="g-f-gills-lbl">Skivor: </span><span class="trait-desc" id="g-f-gills">Tunna, täta, äkta skivor – som vanliga svampskivor</span></span>
-          </div>
-          <div class="trait-row">
-            <span class="trait-icon">🍑</span>
-            <span class="trait-text"><span class="trait-label" id="g-f-cap-lbl">Hatt: </span><span class="trait-desc" id="g-f-cap">Jämnare och rundare, mer regelbunden kant</span></span>
-          </div>
-          <div class="trait-row">
-            <span class="trait-icon">🟠</span>
-            <span class="trait-text"><span class="trait-label" id="g-f-flesh-lbl">Kött: </span><span class="trait-desc" id="g-f-flesh">Orangefärgat kött, mjukare konsistens</span></span>
-          </div>
-          <div class="trait-row">
-            <span class="trait-icon">👃</span>
-            <span class="trait-text"><span class="trait-label" id="g-f-smell-lbl">Doft: </span><span class="trait-desc" id="g-f-smell">Svag, ibland jordaktig – ingen fruktig doft</span></span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- The gills: key difference -->
-  <div class="guide-section">
-    <div class="guide-section-title" id="guide-key-lbl">🔑 Viktigaste tecknet</div>
-    <div class="tip-box">
-      <div class="tip-box-title">〰️ <span id="guide-key-title">Titta på skivorna!</span></div>
-      <p id="guide-key-text">Den äkta kantarellens "skivor" är egentligen tjocka, trubbiga <strong>ribbor</strong> som grenar sig och löper ned längs skaftet. De är svåra att skilja från hattköttet. Den falska kantarellens skivor är <strong>tunna och täta</strong> – precis som en vanlig champinjon. Detta är den enklaste och säkraste skillnaden.</p>
-    </div>
-  </div>
-
-  <!-- Smell test -->
-  <div class="guide-section">
-    <div class="guide-section-title" id="guide-smell-lbl">👃 Luktprovet</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-      <div>
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;" id="guide-real-smell-lbl">Äkta kantarell</div>
-        <span class="smell-badge smell-real" id="guide-real-smell">🍑 Fruktig aprikosliknande doft</span>
-      </div>
-      <div>
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;" id="guide-fake-smell-lbl">Falsk kantarell</div>
-        <span class="smell-badge smell-fake" id="guide-fake-smell">🌍 Svag, jordaktig doft</span>
-      </div>
-    </div>
-    <p style="font-size:12px;color:var(--text-muted);line-height:1.5;" id="guide-smell-desc">Krama försiktigt hatten och lukta. En tydlig fruktig eller aprikosliknande doft är ett gott tecken. Ingen fruktig doft? Var försiktig.</p>
-  </div>
-
-  <!-- Safety warning -->
-  <div class="guide-section">
-    <div class="guide-section-title" id="guide-danger-lbl">⚠️ Viktigt att veta</div>
-    <div class="danger-box">
-      <div class="danger-box-title">⚠️ <span id="guide-danger-title">Falsk kantarell är giftig</span></div>
-      <p id="guide-danger-text">Den falska kantarellen (Hygrophoropsis aurantiaca) kan orsaka mag- och tarmbesvär. Symtom inkluderar illamående, kräkningar och diarré. Förväxla den aldrig med äkta kantarell. Om du är osäker – plocka inte.</p>
-    </div>
-  </div>
-
-  <!-- Pro tips -->
-  <div class="guide-section">
-    <div class="guide-section-title" id="guide-tips-lbl">💡 Nybörjartips</div>
-    <div class="tip-box">
-      <div class="tip-box-title">🌿 <span id="guide-tips-title">Kom ihåg dessa tre saker</span></div>
-      <ul class="tip-list" id="guide-tips-list">
-        <li>Ribbor, inte skivor — äkta kantarell har tjocka grenade ribbor</li>
-        <li>Fruktig doft — aprikosliknande arom är ett säkert tecken</li>
-        <li>Vitt kött — skär igenom hatten; äkta kantarell är vit inuti</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Latin names -->
-  <div class="guide-section" style="border-bottom:none;padding-bottom:20px;">
-    <div class="guide-section-title" id="guide-latin-lbl">📖 Artnamn</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
-      <div style="background:var(--cream);border-radius:8px;padding:10px;">
-        <div style="font-weight:600;color:var(--forest);margin-bottom:2px;" id="guide-real-name2">Äkta kantarell</div>
-        <div style="color:var(--text-muted);font-style:italic;">Cantharellus cibarius</div>
-      </div>
-      <div style="background:var(--cream);border-radius:8px;padding:10px;">
-        <div style="font-weight:600;color:#a02020;margin-bottom:2px;" id="guide-fake-name2">Falsk kantarell</div>
-        <div style="color:var(--text-muted);font-style:italic;">Hygrophoropsis aurantiaca</div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- SUBSCRIBE MODAL -->
 <div class="modal-bg" id="modal">
   <div class="modal">
@@ -1394,35 +986,6 @@
   </div>
 </div>
 
-<!-- LOCAL SPOT MAP DRAWER -->
-<div class="local-map-drawer" id="localMapDrawer">
-  <div class="drawer-handle" onclick="closeLocalMap()"></div>
-  <div class="drawer-header">
-    <div>
-      <div class="drawer-title" id="drawerTitle">Utforska platsen</div>
-      <div class="drawer-coords" id="drawerCoords"></div>
-    </div>
-    <button class="drawer-close" onclick="closeLocalMap()">✕</button>
-  </div>
-  <div class="drawer-actions">
-    <a class="map-open-btn primary" id="btnGoogle" href="#" target="_blank">📍 Google Maps</a>
-    <a class="map-open-btn" id="btnApple" href="#" target="_blank">🗺 Apple Maps</a>
-    <a class="map-open-btn" id="btnLantmateriet" href="#" target="_blank">🌲 Terrängkarta</a>
-  </div>
-  <div class="drawer-layer-row">
-    <button class="layer-pill-btn active" onclick="setLocalLayer('topo',this)">Terrängkarta</button>
-    <button class="layer-pill-btn" onclick="setLocalLayer('satellite',this)">Satellit</button>
-    <button class="layer-pill-btn" onclick="setLocalLayer('osm',this)">Karta</button>
-  </div>
-  <div id="localMap"></div>
-  <div class="drawer-rain-strip" id="drawerRainStrip">
-    <div class="rain-stat-item"><strong id="ds-rain">—</strong>7-dagarsregn</div>
-    <div class="rain-stat-item"><strong id="ds-temp">—</strong>Temperatur</div>
-    <div class="rain-stat-item"><strong id="ds-humid">—</strong>Luftfuktighet</div>
-    <div class="rain-stat-item"><strong id="ds-score">—</strong>Kantarellchans</div>
-  </div>
-</div>
-
 <script>
 // ── TRANSLATIONS ────────────────────────────────────────────────
 const T = {
@@ -1430,7 +993,7 @@ const T = {
     appTitle: 'Kantarelljakten',
     appSub: 'Din guide till kantarelljakten',
     subBtn: '✦ Premium',
-    bannerText: '🍄 7 dagar gratis — hela Sverige upplåst!',
+    bannerText: 'Du ser 3 regioner gratis. Lås upp hela Sverige.',
     bannerCta: 'Uppgradera →',
     lblSearch: 'Sök plats',
     searchPlaceholder: 't.ex. Dalarna, Värmland...',
@@ -1488,7 +1051,7 @@ const T = {
     appTitle: 'ChanterelleHunt',
     appSub: 'Your guide to the chanterelle hunt',
     subBtn: '✦ Premium',
-    bannerText: '🍄 7 days free — all of Sweden unlocked!',
+    bannerText: 'You see 3 regions for free. Unlock all of Sweden.',
     bannerCta: 'Upgrade →',
     lblSearch: 'Search location',
     searchPlaceholder: 'e.g. Dalarna, Värmland...',
@@ -1568,6 +1131,7 @@ function setLang(l) {
   applyTranslations();
   renderChips();
   if (selectedRegion) loadRegion(selectedRegion);
+  updateInstallLang(l === 'sv');
 }
 
 function applyTranslations() {
@@ -1688,8 +1252,8 @@ async function fetchGridScores(points) {
     const batch = points.slice(i, i + BATCH);
     const settled = await Promise.allSettled(batch.map(async p => {
       const data = await fetchWeather(p.lat, p.lng);
-      const { score, cloudcover, total7, avgTemp, humidity } = calcScore(data);
-      return { lat: p.lat, lng: p.lng, score, cloudcover, total7, avgTemp, humidity };
+      const { score, cloudcover } = calcScore(data);
+      return { lat: p.lat, lng: p.lng, score, cloudcover };
     }));
     settled.forEach((r, idx) => {
       if (r.status === 'fulfilled') results.push(r.value);
@@ -1705,7 +1269,7 @@ function renderGridMarkers(gridResults, userLat, userLng) {
   markers = [];
 
   // Draw heatmap circles (large, semi-transparent)
-  gridResults.forEach(({ lat, lng, score, cloudcover, total7, avgTemp, humidity }) => {
+  gridResults.forEach(({ lat, lng, score, cloudcover }) => {
     const circle = L.circle([lat, lng], {
       radius: 12000,           // ~12km radius per point
       color: 'transparent',
@@ -1714,9 +1278,15 @@ function renderGridMarkers(gridResults, userLat, userLng) {
       interactive: true
     }).addTo(map);
 
-    circle.on('click', () => {
-      openLocalMap(lat, lng, score, total7 ?? undefined, avgTemp ?? undefined, humidity ?? undefined);
-    });
+    const sv = lang === 'sv';
+    const cloudIcon = cloudcover !== null
+      ? (cloudcover >= 70 ? '☁️' : cloudcover >= 40 ? '⛅' : '☀️') : '';
+    const emoji = score >= 80 ? '🍄🍄🍄' : score >= 60 ? '🍄🍄' : score >= 40 ? '🍄' : '🌵';
+    circle.bindPopup(
+      `<b>${emoji} ${score}%</b><br>` +
+      (sv ? 'Kantarellsannolikhet' : 'Chanterelle likelihood') +
+      (cloudcover !== null ? `<br>${cloudIcon} ${cloudcover}% ` + (sv ? 'molntäcke' : 'cloud cover') : '')
+    );
     markers.push(circle);
   });
 
@@ -1819,12 +1389,13 @@ function addRegionMarkers(scores) {
       iconSize: [46, 46],
       iconAnchor: [23, 23],
     });
+    const cloudText = cloudcover !== null ? `<br>☁️ ${cloudcover}% molntäcke` : '';
     const marker = L.marker([reg.lat, reg.lng], { icon }).addTo(map);
+    marker.bindPopup(`<b>${region}</b><br>🍄 ${score}% sannolikhet${cloudText}`);
     marker.on('click', () => {
       selectedRegion = region;
       renderChips();
       loadRegion(region);
-      openLocalMap(reg.lat, reg.lng, score);
     });
     markers.push(marker);
   });
@@ -1843,16 +1414,8 @@ let lastUserLat = null, lastUserLng = null;
 // ── WEATHER API ────────────────────────────────────────────────
 async function fetchWeather(lat, lng) {
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=precipitation_sum,temperature_2m_max,temperature_2m_min&hourly=relative_humidity_2m,cloudcover&current=temperature_2m,relative_humidity_2m,precipitation,cloudcover&timezone=Europe%2FStockholm&past_days=7&forecast_days=1`;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
-  try {
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeout);
-    return res.json();
-  } catch (e) {
-    clearTimeout(timeout);
-    throw e;
-  }
+  const res = await fetch(url);
+  return res.json();
 }
 
 function calcScore(data) {
@@ -1966,23 +1529,20 @@ async function loadRegion(name) {
       : ['pill-red', (lang === 'sv' ? `☀️ Klart (${cloudcover}%)` : `☀️ Clear sky (${cloudcover}%)`)];
     setCondition('cond-cloud', cloudCond);
 
-    // Map markers — fetch scores for all free regions in parallel
+    // Map markers — fetch scores for all free regions
     const scores = {};
-    scores[name] = { score, cloudcover };
-    const markerPromises = Object.entries(REGIONS)
-      .filter(([rname, rdata]) => rname !== name)
-      .map(async ([rname, rdata]) => {
-        if (!rdata.premium) {
-          try {
-            const d2 = await fetchWeather(rdata.lat, rdata.lng);
-            const r2 = calcScore(d2);
-            scores[rname] = { score: r2.score, cloudcover: r2.cloudcover };
-          } catch { scores[rname] = { score: 50, cloudcover: null }; }
-        } else {
-          scores[rname] = { score: Math.floor(Math.random() * 40) + 40, cloudcover: null };
-        }
-      });
-    await Promise.all(markerPromises);
+    for (const [rname, rdata] of Object.entries(REGIONS)) {
+      if (!rdata.premium) {
+        if (rname === name) { scores[rname] = { score, cloudcover }; continue; }
+        try {
+          const d2 = await fetchWeather(rdata.lat, rdata.lng);
+          const r2 = calcScore(d2);
+          scores[rname] = { score: r2.score, cloudcover: r2.cloudcover };
+        } catch { scores[rname] = { score: 50, cloudcover: null }; }
+      } else {
+        scores[rname] = { score: Math.floor(Math.random() * 40) + 40, cloudcover: null };
+      }
+    }
     addMapMarkers(scores);
     map.setView([reg.lat, reg.lng], 7, { animate: true });
 
@@ -2030,79 +1590,8 @@ renderChips();
 loadRegion('Dalarna');
 applyPremiumState(); // restore premium if already unlocked
 
-// ── LOCAL SPOT MAP ──────────────────────────────────────────────
-let localMap = null, localMapLayer = null, localMapMarker = null;
-
-function openLocalMap(lat, lng, score, rain7d, temp, humid) {
-  const drawer = document.getElementById('localMapDrawer');
-  drawer.classList.add('open');
-
-  // Header
-  const sv = lang === 'sv';
-  document.getElementById('drawerTitle').textContent = sv ? 'Utforska platsen 🍄' : 'Explore this spot 🍄';
-  document.getElementById('drawerCoords').textContent = `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
-
-  // Stats strip
-  document.getElementById('ds-rain').textContent  = rain7d !== undefined ? rain7d.toFixed(1) + ' mm' : '—';
-  document.getElementById('ds-temp').textContent  = temp   !== undefined ? temp.toFixed(1)  + ' °C' : '—';
-  document.getElementById('ds-humid').textContent = humid  !== undefined ? humid + ' %'              : '—';
-  document.getElementById('ds-score').textContent = score  !== undefined ? score + ' %'              : '—';
-
-  // Deep links — open native map apps on phone
-  document.getElementById('btnGoogle').href =
-    `https://www.google.com/maps?q=${lat},${lng}&z=14`;
-  document.getElementById('btnApple').href =
-    `https://maps.apple.com/?ll=${lat},${lng}&z=14`;
-  document.getElementById('btnLantmateriet').href =
-    `https://karta.lantmateriet.se/#rit=topowebb&zoom=14&north=${lat}&east=${lng}`;
-
-  // Init Leaflet local map (lazy — only once)
-  if (!localMap) {
-    localMap = L.map('localMap').setView([lat, lng], 13);
-    setLocalLayer('topo', document.querySelector('.layer-pill-btn.active'));
-  } else {
-    localMap.setView([lat, lng], 13);
-    if (localMapMarker) localMap.removeLayer(localMapMarker);
-  }
-
-  // Drop a marker
-  const scoreCol = score >= 80 ? '#2a7a3a' : score >= 60 ? '#5aaa4a' : score >= 40 ? '#e8a020' : '#c04040';
-  const icon = L.divIcon({
-    className: '',
-    html: `<div style="background:${scoreCol};color:white;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);">${score || '?'}%</div>`,
-    iconSize: [36,36], iconAnchor: [18,18]
-  });
-  localMapMarker = L.marker([lat, lng], { icon }).addTo(localMap);
-  localMapMarker.bindPopup(`🍄 ${score || '?'}% ${sv ? 'kantarellchans' : 'chanterelle likelihood'}`).openPopup();
-
-  // Force Leaflet to recalculate size after drawer opens
-  setTimeout(() => localMap.invalidateSize(), 350);
-}
-
-function closeLocalMap() {
-  document.getElementById('localMapDrawer').classList.remove('open');
-}
-
-function setLocalLayer(type, btn) {
-  if (!localMap) return;
-  if (localMapLayer) localMap.removeLayer(localMapLayer);
-  const urls = {
-    topo:      'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    osm:       'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  };
-  const attribs = { topo: '© OpenTopoMap', satellite: '© Esri', osm: '© OpenStreetMap' };
-  localMapLayer = L.tileLayer(urls[type], { maxZoom: 17, attribution: attribs[type] }).addTo(localMap);
-  document.querySelectorAll('.layer-pill-btn').forEach(p => p.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-}
-
 // ── SERVICE WORKER ──────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
-  // Unregister old service workers to force fresh content
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    regs.forEach(reg => reg.unregister());
-  });
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then(reg => console.log('SW registered:', reg.scope))
@@ -2110,29 +1599,59 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// ── INSTALL PROMPT (Android) ────────────────────────────────────
+// ── INSTALL PROMPT (Android + iOS) ─────────────────────────────
 let deferredPrompt;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  setTimeout(() => {
-    if (!deferredPrompt) return;
-    const banner = document.createElement('div');
-    banner.id = 'install-banner';
-    banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2d4a1e;color:#f5e4b0;padding:12px 20px;border-radius:24px;font-family:DM Sans,sans-serif;font-size:14px;display:flex;align-items:center;gap:12px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);white-space:nowrap;';
-    banner.innerHTML = '<span>🍄</span><span id="install-txt">' + (lang==='sv'?'Installera appen':'Install the app') + '</span><button onclick="installApp()" style="background:#c8901a;color:#2d4a1e;border:none;border-radius:14px;padding:5px 14px;font-weight:500;font-size:13px;cursor:pointer;">' + (lang==='sv'?'Installera':'Install') + '</button><button onclick="document.getElementById(\'install-banner\').remove()" style="background:none;border:none;color:rgba(245,228,176,0.6);font-size:18px;cursor:pointer;padding:0 4px;">✕</button>';
-    document.body.appendChild(banner);
-  }, 10000);
-});
+const installBtn = document.getElementById('install-btn');
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+if (!isStandalone) {
+  if (isIOS) {
+    installBtn.classList.add('visible');
+  } else {
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.classList.add('visible');
+    });
+    window.addEventListener('appinstalled', () => {
+      installBtn.classList.remove('visible');
+      deferredPrompt = null;
+    });
+  }
+}
+
+function handleInstallClick() {
+  if (isIOS) {
+    document.getElementById('ios-install-overlay').classList.add('open');
+  } else if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      installBtn.classList.remove('visible');
+    });
+  }
+}
+
+function updateInstallLang(sv) {
+  document.getElementById('install-btn-label').textContent = sv ? 'Installera' : 'Install app';
+  document.getElementById('ios-title').textContent = sv ? 'Lägg till på hemskärmen' : 'Add to Home Screen';
+  document.getElementById('ios-subtitle').textContent = sv
+    ? 'Följ dessa två enkla steg för att installera Kantarelljakten som en app på din iPhone:'
+    : 'Follow these two simple steps to install Kantarelljakten as an app on your iPhone:';
+  document.getElementById('ios-step1-title').textContent = sv ? 'Steg 1 — Tryck på Dela' : 'Step 1 — Tap Share';
+  document.getElementById('ios-step1-text').textContent = sv
+    ? 'Tryck på dela-ikonen längst ner i Safari (rutan med en pil uppåt)'
+    : 'Tap the Share icon at the bottom of Safari (the box with an arrow pointing up)';
+  document.getElementById('ios-step2-title').textContent = sv ? 'Steg 2 — Lägg till' : 'Step 2 — Add';
+  document.getElementById('ios-step2-text').textContent = sv
+    ? 'Scrolla ned och tryck på "Lägg till på hemskärmen", sedan "Lägg till"'
+    : 'Scroll down and tap "Add to Home Screen", then tap "Add"';
+  document.getElementById('ios-close-label').textContent = sv ? 'Stäng' : 'Close';
+}
 
 function installApp() {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(() => {
-    deferredPrompt = null;
-    const b = document.getElementById('install-banner');
-    if (b) b.remove();
-  });
+  handleInstallClick();
 }
 
 // ── PREMIUM UNLOCK ──────────────────────────────────────────────
@@ -2141,14 +1660,34 @@ function installApp() {
 const PREMIUM_CODES = ['KANTARELL2024', 'GULD2024', 'SVAMP2024'];
 const PREMIUM_KEY  = 'kantarell_premium_v1';
 const TRIAL_KEY    = 'kantarell_trial_start_v1';
-const TRIAL_DAYS   = 7;
+const TRIAL_DAYS   = 30;
 
 /* ── TRIAL HELPERS ───────────────────────────────────────────── */
-function getTrialStart() { return Date.now(); }
-function daysRemaining() { return 7; }
-function trialActive() { return true; }
-function isPremium() { return localStorage.getItem(PREMIUM_KEY) === 'true'; }
-function hasAccess() { return true; }
+function getTrialStart() {
+  let ts = localStorage.getItem(TRIAL_KEY);
+  if (!ts) {
+    ts = Date.now().toString();
+    localStorage.setItem(TRIAL_KEY, ts);
+  }
+  return parseInt(ts, 10);
+}
+
+function daysRemaining() {
+  const elapsed = (Date.now() - getTrialStart()) / (1000 * 60 * 60 * 24);
+  return Math.max(0, Math.ceil(TRIAL_DAYS - elapsed));
+}
+
+function trialActive() {
+  return daysRemaining() > 0;
+}
+
+function isPremium() {
+  return localStorage.getItem(PREMIUM_KEY) === 'true';
+}
+
+function hasAccess() {
+  return isPremium() || trialActive();
+}
 
 /* ── BANNER STATE ────────────────────────────────────────────── */
 function updateTrialBanner() {
@@ -2180,17 +1719,17 @@ function updateTrialBanner() {
   // Trial active
   Object.keys(REGIONS).forEach(r => REGIONS[r].premium = false);
 
-  if (days <= 2) {
+  if (days <= 7) {
     // Urgent — amber warning
     bannerText.textContent = sv
-      ? `⚠️ ${days} dag${days === 1 ? '' : 'ar'} kvar av din kostnadsfria vecka.`
-      : `⚠️ ${days} day${days === 1 ? '' : 's'} left in your free week.`;
+      ? `⚠️ ${days} dag${days === 1 ? '' : 'ar'} kvar av din provperiod.`
+      : `⚠️ ${days} day${days === 1 ? '' : 's'} left in your free trial.`;
     banner.style.background = 'linear-gradient(135deg, #8b5a00, #b07800)';
   } else {
     // Plenty of time — neutral green
     bannerText.textContent = sv
-      ? `🍄 ${days} dagar kvar av din kostnadsfria vecka — hela Sverige upplåst!`
-      : `🍄 ${days} days left in your free week — all of Sweden unlocked!`;
+      ? `🍄 ${days} dagar kvar av din kostnadsfria provperiod — hela Sverige upplåst!`
+      : `🍄 ${days} days left in your free trial — all of Sweden unlocked!`;
     banner.style.background = '';
   }
 
@@ -2241,7 +1780,7 @@ function applyPremiumState() {
   } else if (trialActive()) {
     const days = daysRemaining();
     document.getElementById('sub-btn').textContent = sv ? `🍄 ${days}d kvar` : `🍄 ${days}d left`;
-    document.getElementById('sub-btn').style.background = days <= 2 ? '#8b5a00' : '';
+    document.getElementById('sub-btn').style.background = days <= 7 ? '#8b5a00' : '';
     document.getElementById('sub-btn').onclick = openModal;
   } else {
     // Trial expired — force modal
@@ -2351,33 +1890,23 @@ function renderJournal() {
 function switchTab(tab) {
   const mapPanel = document.getElementById('map-panel');
   const journalPanel = document.getElementById('journal-panel');
-  const guidePanel = document.getElementById('guide-panel');
   const tabMap = document.getElementById('tab-map');
   const tabJournal = document.getElementById('tab-journal');
-  const tabGuide = document.getElementById('tab-guide');
-
-  // Reset all
-  mapPanel.style.display = 'none';
-  journalPanel.classList.remove('visible');
-  guidePanel.classList.remove('visible');
-  tabMap.classList.remove('active');
-  tabJournal.classList.remove('active');
-  tabGuide.classList.remove('active');
 
   if (tab === 'map') {
     mapPanel.style.display = '';
+    journalPanel.classList.remove('visible');
     tabMap.classList.add('active');
-  } else if (tab === 'journal') {
+    tabJournal.classList.remove('active');
+  } else {
+    mapPanel.style.display = 'none';
     journalPanel.classList.add('visible');
+    tabMap.classList.remove('active');
     tabJournal.classList.add('active');
     // Set today's date as default
     const dateField = document.getElementById('j-date');
     if (!dateField.value) dateField.value = new Date().toISOString().slice(0,10);
     renderJournal();
-  } else if (tab === 'guide') {
-    guidePanel.classList.add('visible');
-    tabGuide.classList.add('active');
-    applyGuideTranslations();
   }
 }
 
@@ -2397,173 +1926,10 @@ applyTranslations = function() {
   document.getElementById('lbl-have-code').textContent = sv ? 'Har du redan en kod?' : 'Already have a code?';
   document.getElementById('unlock-input').placeholder = sv ? 'Ange din premiumkod...' : 'Enter your premium code...';
   document.getElementById('unlock-btn').textContent = sv ? 'Lås upp' : 'Unlock';
-  document.getElementById('tab-guide-lbl').textContent = sv ? 'Lär dig' : 'Learn';
   renderJournal();
 };
 
-function applyGuideTranslations() {
-  const sv = lang === 'sv';
-  const g = {
-    title:          sv ? '🍄 Känna igen kantarellen'                                    : '🍄 Identifying the Chanterelle',
-    subtitle:       sv ? 'Lär dig skillnaden mellan äkta kantarell och den falska kantarellen' : 'Learn the difference between the real chanterelle and the false one',
-    compareLbl:     sv ? 'Jämförelse'                                                   : 'Comparison',
-    realName:       sv ? 'Äkta kantarell'                                               : 'Real chanterelle',
-    fakeName:       sv ? 'Falsk kantarell'                                              : 'False chanterelle',
-    colorLbl:       sv ? 'Färg: '                                                       : 'Colour: ',
-    rColor:         sv ? 'Guldgul till äggulefärgad, jämn'                              : 'Golden yellow to egg-yolk, even tone',
-    fColor:         sv ? 'Orange till röd-orange, intensivare och ojämnare'             : 'Orange to red-orange, more intense and uneven',
-    gillsLbl:       sv ? 'Skivor: '                                                     : 'Gills: ',
-    rGills:         sv ? 'Tjocka, trubbiga, förgrenade ribbor – löper ned på skaftet'  : 'Thick, blunt, forked ridges – run down the stem',
-    fGills:         sv ? 'Tunna, täta, äkta skivor – som vanliga svampskivor'          : 'Thin, crowded, true gills – like a regular mushroom',
-    capLbl:         sv ? 'Hatt: '                                                       : 'Cap: ',
-    rCap:           sv ? 'Böjd kant, oregelbunden och vågig. Trattformad med ålder'    : 'Wavy and irregular margin. Funnel-shaped with age',
-    fCap:           sv ? 'Jämnare och rundare, mer regelbunden kant'                    : 'Smoother and rounder, more regular margin',
-    fleshLbl:       sv ? 'Kött: '                                                       : 'Flesh: ',
-    rFlesh:         sv ? 'Vitt och fast, mjölkvitt när det skärs'                      : 'White and firm, milky white when cut',
-    fFlesh:         sv ? 'Orangefärgat kött, mjukare konsistens'                       : 'Orange-coloured flesh, softer texture',
-    smellLbl:       sv ? 'Doft: '                                                       : 'Smell: ',
-    rSmell:         sv ? 'Fruktig, aprikosliknande'                                    : 'Fruity, apricot-like',
-    fSmell:         sv ? 'Svag, ibland jordaktig – ingen fruktig doft'                 : 'Faint, sometimes earthy – no fruity scent',
-    keyLbl:         sv ? '🔑 Viktigaste tecknet'                                        : '🔑 Key difference',
-    keyTitle:       sv ? 'Titta på skivorna!'                                           : 'Look at the gills!',
-    keyText:        sv ? 'Den äkta kantarellens "skivor" är egentligen tjocka, trubbiga <strong>ribbor</strong> som grenar sig och löper ned längs skaftet. De är svåra att skilja från hattköttet. Den falska kantarellens skivor är <strong>tunna och täta</strong> – precis som en vanlig champinjon. Detta är den enklaste och säkraste skillnaden.' : "The real chanterelle's \"gills\" are actually thick, blunt <strong>ridges</strong> that fork and run down the stem. They are hard to separate from the cap flesh. The false chanterelle has <strong>thin, crowded</strong> true gills – just like a regular mushroom. This is the easiest and most reliable difference.",
-    smellSectionLbl:sv ? '👃 Luktprovet'                                                : '👃 The smell test',
-    realSmellLbl:   sv ? 'Äkta kantarell'                                               : 'Real chanterelle',
-    fakeSmellLbl:   sv ? 'Falsk kantarell'                                              : 'False chanterelle',
-    realSmellBadge: sv ? '🍑 Fruktig aprikosliknande doft'                             : '🍑 Fruity apricot-like scent',
-    fakeSmellBadge: sv ? '🌍 Svag, jordaktig doft'                                     : '🌍 Faint, earthy smell',
-    smellDesc:      sv ? 'Krama försiktigt hatten och lukta. En tydlig fruktig eller aprikosliknande doft är ett gott tecken. Ingen fruktig doft? Var försiktig.' : 'Gently squeeze the cap and smell. A clear fruity or apricot-like scent is a good sign. No fruity scent? Be cautious.',
-    dangerLbl:      sv ? '⚠️ Viktigt att veta'                                          : '⚠️ Important to know',
-    dangerTitle:    sv ? 'Falsk kantarell är giftig'                                    : 'False chanterelle is poisonous',
-    dangerText:     sv ? 'Den falska kantarellen (Hygrophoropsis aurantiaca) kan orsaka mag- och tarmbesvär. Symtom inkluderar illamående, kräkningar och diarré. Förväxla den aldrig med äkta kantarell. Om du är osäker – plocka inte.' : 'The false chanterelle (Hygrophoropsis aurantiaca) can cause gastrointestinal distress. Symptoms include nausea, vomiting and diarrhoea. Never confuse it with the real chanterelle. If in doubt – leave it out.',
-    tipsLbl:        sv ? '💡 Nybörjartips'                                              : '💡 Beginner tips',
-    tipsTitle:      sv ? 'Kom ihåg dessa tre saker'                                     : 'Remember these three things',
-    tip1:           sv ? 'Ribbor, inte skivor — äkta kantarell har tjocka grenade ribbor'  : 'Ridges, not gills — real chanterelle has thick forked ridges',
-    tip2:           sv ? 'Fruktig doft — aprikosliknande arom är ett säkert tecken'        : 'Fruity scent — apricot-like aroma is a reliable sign',
-    tip3:           sv ? 'Vitt kött — skär igenom hatten; äkta kantarell är vit inuti'     : 'White flesh — cut through the cap; real chanterelle is white inside',
-    latinLbl:       sv ? '📖 Artnamn'                                                   : '📖 Species names',
-    realName2:      sv ? 'Äkta kantarell'                                               : 'Real chanterelle',
-    fakeName2:      sv ? 'Falsk kantarell'                                              : 'False chanterelle',
-  };
-
-  document.getElementById('guide-title').textContent = g.title;
-  document.getElementById('guide-subtitle').textContent = g.subtitle;
-  document.getElementById('guide-compare-lbl').textContent = g.compareLbl;
-  document.getElementById('guide-real-name').textContent = g.realName;
-  document.getElementById('guide-fake-name').textContent = g.fakeName;
-  document.getElementById('g-r-color-lbl').textContent = g.colorLbl;
-  document.getElementById('g-r-color').textContent = g.rColor;
-  document.getElementById('g-f-color-lbl').textContent = g.colorLbl;
-  document.getElementById('g-f-color').textContent = g.fColor;
-  document.getElementById('g-r-gills-lbl').textContent = g.gillsLbl;
-  document.getElementById('g-r-gills').textContent = g.rGills;
-  document.getElementById('g-f-gills-lbl').textContent = g.gillsLbl;
-  document.getElementById('g-f-gills').textContent = g.fGills;
-  document.getElementById('g-r-cap-lbl').textContent = g.capLbl;
-  document.getElementById('g-r-cap').textContent = g.rCap;
-  document.getElementById('g-f-cap-lbl').textContent = g.capLbl;
-  document.getElementById('g-f-cap').textContent = g.fCap;
-  document.getElementById('g-r-flesh-lbl').textContent = g.fleshLbl;
-  document.getElementById('g-r-flesh').textContent = g.rFlesh;
-  document.getElementById('g-f-flesh-lbl').textContent = g.fleshLbl;
-  document.getElementById('g-f-flesh').textContent = g.fFlesh;
-  document.getElementById('g-r-smell-lbl').textContent = g.smellLbl;
-  document.getElementById('g-r-smell').textContent = g.rSmell;
-  document.getElementById('g-f-smell-lbl').textContent = g.smellLbl;
-  document.getElementById('g-f-smell').textContent = g.fSmell;
-  document.getElementById('guide-key-lbl').textContent = g.keyLbl;
-  document.getElementById('guide-key-title').textContent = g.keyTitle;
-  document.getElementById('guide-key-text').innerHTML = g.keyText;
-  document.getElementById('guide-smell-lbl').textContent = g.smellSectionLbl;
-  document.getElementById('guide-real-smell-lbl').textContent = g.realSmellLbl;
-  document.getElementById('guide-fake-smell-lbl').textContent = g.fakeSmellLbl;
-  document.getElementById('guide-real-smell').textContent = g.realSmellBadge;
-  document.getElementById('guide-fake-smell').textContent = g.fakeSmellBadge;
-  document.getElementById('guide-smell-desc').textContent = g.smellDesc;
-  document.getElementById('guide-danger-lbl').textContent = g.dangerLbl;
-  document.getElementById('guide-danger-title').textContent = g.dangerTitle;
-  document.getElementById('guide-danger-text').textContent = g.dangerText;
-  document.getElementById('guide-tips-lbl').textContent = g.tipsLbl;
-  document.getElementById('guide-tips-title').textContent = g.tipsTitle;
-  const tipsList = document.getElementById('guide-tips-list');
-  tipsList.innerHTML = [g.tip1, g.tip2, g.tip3].map(t => `<li>${t}</li>`).join('');
-  document.getElementById('guide-latin-lbl').textContent = g.latinLbl;
-  document.getElementById('guide-real-name2').textContent = g.realName2;
-  document.getElementById('guide-fake-name2').textContent = g.fakeName2;
-}
-
-
-// ── PWA INSTALL PROMPT ──────────────────────────────────────────
-let deferredInstallPrompt = null;
-const installBtn = document.getElementById('install-btn');
-
-const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
-// Don't show if already installed
-if (!isInStandaloneMode) {
-  if (isIOS) {
-    // iOS: always show button since we can't detect install state perfectly
-    installBtn.classList.add('visible');
-  } else {
-    // Android/Chrome: listen for the native beforeinstallprompt event
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredInstallPrompt = e;
-      installBtn.classList.add('visible');
-    });
-    // Hide button after successful install
-    window.addEventListener('appinstalled', () => {
-      installBtn.classList.remove('visible');
-      deferredInstallPrompt = null;
-    });
-  }
-}
-
-function handleInstallClick() {
-  if (isIOS) {
-    // Show the step-by-step guide
-    document.getElementById('ios-install-overlay').classList.add('open');
-  } else if (deferredInstallPrompt) {
-    // Trigger native Android install prompt
-    deferredInstallPrompt.prompt();
-    deferredInstallPrompt.userChoice.then((result) => {
-      if (result.outcome === 'accepted') {
-        installBtn.classList.remove('visible');
-      }
-      deferredInstallPrompt = null;
-    });
-  }
-}
-
-// Update install button and iOS popup text when language switches
-const origSetLang = window.setLang || null;
-function patchLangForInstall(l) {
-  const isSv = l === 'sv';
-  document.getElementById('install-btn-label').textContent = isSv ? 'Installera' : 'Install app';
-  document.getElementById('ios-title').textContent = isSv ? 'Lägg till på hemskärmen' : 'Add to Home Screen';
-  document.getElementById('ios-subtitle').textContent = isSv
-    ? 'Följ dessa två enkla steg för att installera Kantarelljakten som en app på din iPhone:'
-    : 'Follow these two simple steps to install Kantarelljakten as an app on your iPhone:';
-  document.getElementById('ios-step1-title').textContent = isSv ? 'Steg 1 — Tryck på Dela' : 'Step 1 — Tap Share';
-  document.getElementById('ios-step1-text').textContent = isSv
-    ? 'Tryck på dela-ikonen längst ner i Safari (rutan med en pil uppåt)'
-    : 'Tap the Share icon at the bottom of Safari (the box with an arrow pointing up)';
-  document.getElementById('ios-step2-title').textContent = isSv ? 'Steg 2 — Lägg till' : 'Step 2 — Add';
-  document.getElementById('ios-step2-text').textContent = isSv
-    ? 'Scrolla ned och tryck på "Lägg till på hemskärmen", sedan "Lägg till"'
-    : 'Scroll down and tap "Add to Home Screen", then tap "Add"';
-  document.getElementById('ios-close-label').textContent = isSv ? 'Stäng' : 'Close';
-}
-
-// Hook into the existing setLang function
-const _origSetLang = setLang;
-setLang = function(l) {
-  _origSetLang(l);
-  patchLangForInstall(l);
-};
-
-
+</script>
 
 <!-- iOS Install Guide Popup -->
 <div class="ios-install-overlay" id="ios-install-overlay">
