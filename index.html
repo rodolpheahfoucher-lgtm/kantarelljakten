@@ -153,6 +153,113 @@
   }
   .subscribe-btn:hover { background: var(--gold-light); }
 
+  /* INSTALL BUTTON */
+  .install-btn {
+    background: rgba(255,255,255,0.15);
+    color: var(--gold-pale);
+    border: 1px solid rgba(200,144,26,0.5);
+    border-radius: 20px;
+    padding: 7px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: none;
+    align-items: center;
+    gap: 6px;
+  }
+  .install-btn:hover { background: rgba(255,255,255,0.25); }
+  .install-btn.visible { display: flex; }
+
+  /* iOS INSTALL GUIDE POPUP */
+  .ios-install-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 9000;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 20px;
+  }
+  .ios-install-overlay.open { display: flex; }
+  .ios-install-box {
+    background: white;
+    border-radius: 20px 20px 16px 16px;
+    padding: 28px 24px 32px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+  }
+  .ios-install-box h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--forest);
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+  .ios-install-box p {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .ios-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+    margin-bottom: 24px;
+  }
+  .ios-step {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--mist);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .ios-step-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+  .ios-step-text {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .ios-step-text strong {
+    display: block;
+    color: var(--forest);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .ios-close-btn {
+    background: var(--forest);
+    color: var(--gold-pale);
+    border: none;
+    border-radius: 20px;
+    padding: 12px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+  }
+  /* Arrow pointing down for iPhone bottom bar */
+  .ios-arrow {
+    text-align: center;
+    font-size: 28px;
+    margin-top: 8px;
+    animation: bounce 1.5s infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+  }
+
   /* PREMIUM BANNER */
   .premium-banner {
     background: linear-gradient(135deg, var(--forest-mid), var(--forest));
@@ -967,6 +1074,7 @@
         <button class="lang-btn active" onclick="setLang('sv')">SV</button>
         <button class="lang-btn" onclick="setLang('en')">EN</button>
       </div>
+      <button class="install-btn" id="install-btn" onclick="handleInstallClick()">📲 <span id="install-btn-label">Installera</span></button>
       <button class="subscribe-btn" onclick="openModal()" id="sub-btn">✦ Premium</button>
     </div>
   </div>
@@ -2385,7 +2493,103 @@ function applyGuideTranslations() {
 }
 
 
+// ── PWA INSTALL PROMPT ──────────────────────────────────────────
+let deferredInstallPrompt = null;
+const installBtn = document.getElementById('install-btn');
 
-</script>
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+// Don't show if already installed
+if (!isInStandaloneMode) {
+  if (isIOS) {
+    // iOS: always show button since we can't detect install state perfectly
+    installBtn.classList.add('visible');
+  } else {
+    // Android/Chrome: listen for the native beforeinstallprompt event
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      installBtn.classList.add('visible');
+    });
+    // Hide button after successful install
+    window.addEventListener('appinstalled', () => {
+      installBtn.classList.remove('visible');
+      deferredInstallPrompt = null;
+    });
+  }
+}
+
+function handleInstallClick() {
+  if (isIOS) {
+    // Show the step-by-step guide
+    document.getElementById('ios-install-overlay').classList.add('open');
+  } else if (deferredInstallPrompt) {
+    // Trigger native Android install prompt
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then((result) => {
+      if (result.outcome === 'accepted') {
+        installBtn.classList.remove('visible');
+      }
+      deferredInstallPrompt = null;
+    });
+  }
+}
+
+// Update install button and iOS popup text when language switches
+const origSetLang = window.setLang || null;
+function patchLangForInstall(l) {
+  const isSv = l === 'sv';
+  document.getElementById('install-btn-label').textContent = isSv ? 'Installera' : 'Install app';
+  document.getElementById('ios-title').textContent = isSv ? 'Lägg till på hemskärmen' : 'Add to Home Screen';
+  document.getElementById('ios-subtitle').textContent = isSv
+    ? 'Följ dessa två enkla steg för att installera Kantarelljakten som en app på din iPhone:'
+    : 'Follow these two simple steps to install Kantarelljakten as an app on your iPhone:';
+  document.getElementById('ios-step1-title').textContent = isSv ? 'Steg 1 — Tryck på Dela' : 'Step 1 — Tap Share';
+  document.getElementById('ios-step1-text').textContent = isSv
+    ? 'Tryck på dela-ikonen längst ner i Safari (rutan med en pil uppåt)'
+    : 'Tap the Share icon at the bottom of Safari (the box with an arrow pointing up)';
+  document.getElementById('ios-step2-title').textContent = isSv ? 'Steg 2 — Lägg till' : 'Step 2 — Add';
+  document.getElementById('ios-step2-text').textContent = isSv
+    ? 'Scrolla ned och tryck på "Lägg till på hemskärmen", sedan "Lägg till"'
+    : 'Scroll down and tap "Add to Home Screen", then tap "Add"';
+  document.getElementById('ios-close-label').textContent = isSv ? 'Stäng' : 'Close';
+}
+
+// Hook into the existing setLang function
+const _origSetLang = setLang;
+setLang = function(l) {
+  _origSetLang(l);
+  patchLangForInstall(l);
+};
+
+
+
+<!-- iOS Install Guide Popup -->
+<div class="ios-install-overlay" id="ios-install-overlay">
+  <div class="ios-install-box">
+    <h3 id="ios-title">Lägg till på hemskärmen</h3>
+    <p id="ios-subtitle">Följ dessa två enkla steg för att installera Kantarelljakten som en app på din iPhone:</p>
+    <div class="ios-steps">
+      <div class="ios-step">
+        <div class="ios-step-icon">⬆️</div>
+        <div class="ios-step-text">
+          <strong id="ios-step1-title">Steg 1 — Tryck på Dela</strong>
+          <span id="ios-step1-text">Tryck på dela-ikonen längst ner i Safari (rutan med en pil uppåt)</span>
+        </div>
+      </div>
+      <div class="ios-step">
+        <div class="ios-step-icon">➕</div>
+        <div class="ios-step-text">
+          <strong id="ios-step2-title">Steg 2 — Lägg till</strong>
+          <span id="ios-step2-text">Scrolla ned och tryck på "Lägg till på hemskärmen", sedan "Lägg till"</span>
+        </div>
+      </div>
+    </div>
+    <button class="ios-close-btn" onclick="document.getElementById('ios-install-overlay').classList.remove('open')" id="ios-close-label">Stäng</button>
+    <div class="ios-arrow">↓</div>
+  </div>
+</div>
+
 </body>
 </html>
